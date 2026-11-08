@@ -1,0 +1,106 @@
+% =============================================================
+% jobs/site_common.tex — shared blocks for the portfolio resumes
+% (Full-Stack, AI Engineer, Data Analyst). Facts come from the repos.
+% =============================================================
+
+\renewcommand{\locationLine}{Mangaluru, Karnataka \ · \ Open to relocate: Bengaluru, Hyderabad, Pune}
+
+\renewcommand{\experienceContent}{%
+\resumeEntryTitle{Founder \& Developer — ProntoPy (prontopy.com)}{2026 -- Present}
+\resumeItemListStart
+  \item Built and run a free platform teaching Python, DSA and AI/ML: 47 modules, 360+ lessons, 940 problems with a LeetCode-style judge, and Python running offline in the browser (Pyodide).
+\resumeItemListEnd
+
+\resumeEntryTitle{Software Developer Intern — Prasanna Technologies Pvt.\ Ltd.}{Jun 2026}
+\resumeItemListStart
+  \item Built dynamic, configuration-driven forms and UI components for enterprise software used across the internal platform.
+  \item Debugged backend issues through log analysis, network tracing and PostgreSQL validation; worked in sprints with Git, Docker and Ubuntu.
+\resumeItemListEnd
+
+\resumeEntryTitle{Freelance Software Developer — House of Anaika}{May 2026}
+\resumeItemListStart
+  \item Built a headless Shopify storefront with 300+ products, a Python lead-generation tool (zextractor), and moved sales operations onto Zoho CRM.
+\resumeItemListEnd%
+}
+
+\renewcommand{\leadershipContent}{%
+\begin{itemize}[leftmargin=1.15em, itemsep=1pt, topsep=1pt, parsep=0pt]
+    \item \textbf{Hackathons:} CODE MEET 2026, Srinivas University: No.\,1 in Round 1, top 5 of 100 in Round 2 (MindMirror) · GATEWAYS 2026: Round 2 of 150+ teams (Paroh)
+    \item \textbf{Co-Founder}, DAT Community · \textbf{Host}, Eleven Bytes, a coding event with 25+ colleges
+    \item \textbf{Strengths:} Fast learner · Adaptable across web, Android, desktop and hardware · Creative problem solver
+\end{itemize}%
+}
+
+% ---------- project blocks ----------
+\newcommand{\pTonefer}{%
+\textbf{Tonefer — Encrypted Phone $\leftrightarrow$ Laptop Transfer (Python, Kotlin)} \hfill \href{https://github.com/pankqx/tonefer}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Offline transfer over a phone hotspot or USB; each payload sealed with XSalsa20-Poly1305 (256-bit key via QR).
+  \item Shipped Ubuntu (.deb) and Windows installers plus a native Android app (Jetpack Compose, share sheet, background delivery); CI builds and tests every release.
+\resumeItemListEnd%
+}
+\newcommand{\pMindMirror}{%
+\textbf{MindMirror — Student Wellness App + AI Necklace (React, TS, ESP32)} \hfill \href{https://pankqx.github.io/MindMirror/}{\faGlobe\ Live} \\[-9pt]
+\resumeItemListStart
+  \item Spots early stress against a student's own normal, without diagnosing; voice companion via a Node hub (Groq LLM).
+  \item Owned the hub and the ESP32 necklace firmware (INMP441 mic, MAX98357 amp). Built for CODE MEET 2026 at Srinivas University: No.\,1 in Round 1, top 5 of 100 teams in Round 2.
+\resumeItemListEnd%
+}
+\newcommand{\pParoh}{%
+\textbf{Paroh — HumanTwin AI, Consent-First Digital Twin (Next.js, TS)} \hfill \href{https://github.com/pankqx/paroh-twin}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item 24-hour build: journal $\rightarrow$ facts $\rightarrow$ user approval $\rightarrow$ visual twin $\rightarrow$ what-if simulation $\rightarrow$ spoken advice.
+  \item Wrote the twin engine (Monte Carlo what-if, fidelity score); hosted LLM via OpenRouter with voice replies.
+\resumeItemListEnd%
+}
+\newcommand{\pFlow}{%
+\textbf{Flow \& Magic — Live Visual Explanations for Presenters (React, TS)} \hfill \href{https://github.com/pankqx/flow-magic}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Typed, spoken and gesture input summon animated diagrams; visuals are validated JSON descriptors drawn by custom SVG renderers, so AI output is never executed.
+  \item Built in small vertical slices with AI coding agents, guarded by architecture decision records and 131 automated tests.
+\resumeItemListEnd%
+}
+\newcommand{\pLeaflet}{%
+\textbf{Leaflet — Leave Management System (MongoDB, Express, Angular 17, Node)} \hfill \href{https://github.com/pankqx/leavemgm}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Employees apply for leave and managers approve or reject it; JWT sessions, leave balances by type and a REST API kept separate from the Angular client.
+\resumeItemListEnd%
+}
+\newcommand{\pBrownie}{%
+\textbf{The Brownie Press — Storefront + Owner Dashboard (React 19, TS, Supabase)} \hfill \href{https://pankqx.github.io/thebrowniepress/}{\faGlobe\ Live} \\[-9pt]
+\resumeItemListStart
+  \item Freelance build for a home bakery: multi-item cart sent as one WhatsApp order, owner dashboard on Supabase Auth, Postgres row-level security and Storage.
+\resumeItemListEnd%
+}
+\newcommand{\pPlevel}{%
+\textbf{Plevel — Local LLM Desktop Chat for Coding (Python, PySide6, Ollama)} \hfill \href{https://github.com/pankqx/plevel}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Native Ubuntu app for local Ollama models: streaming replies, Markdown with highlighted code, SQLite chat history and search; fully offline.
+\resumeItemListEnd%
+}
+\newcommand{\pZext}{%
+\textbf{zextractor — Lead Generation with Claude API (Python)} \hfill \href{https://github.com/pankqx/zextractor}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item CLI that exports jewellery-store names, addresses and phones from Google Maps to CSV, with an optional Claude API step that drafts personalized outreach lines.
+\resumeItemListEnd%
+}
+\newcommand{\pTrading}{%
+\textbf{tradingb0t — Explainable Stock Research for Indian Markets (React, TS)} \hfill \href{https://github.com/pankqx/tradingbot}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Ranked research queue and rule-based signals that show why each was generated; runs on simulated market data with a Postgres-ready data layer.
+\resumeItemListEnd%
+}
+\newcommand{\pQuiz}{%
+\textbf{QuizApp — Online Exams with Admin Analytics (ASP.NET Core MVC, EF Core)} \hfill \href{https://github.com/pankqx/QuizApp}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Admins author quizzes, students get instant scores; role-based cookie auth and an analytics dashboard summarizing results.
+\resumeItemListEnd%
+}
+
+\renewcommand{\certificationsContent}{%
+\textbf{Intro to AI} — Oracle · \textbf{Programming in Python} — Infosys Springboard · \textbf{Cybersecurity} — NPTEL%
+}
+
+\renewcommand{\educationContent}{%
+\textbf{MCA (Master of Computer Applications)} — St Aloysius (Deemed to be University), Mangaluru \hfill \textit{2025 -- 2027}%
+}

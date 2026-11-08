@@ -9,7 +9,7 @@ AI full-stack engineer · MCA ’27, St Aloysius, Mangaluru · Founder of [Pront
 |---|---|
 | **[ProntoPy](https://prontopy.com)** | Free, browser-only school for Python, DSA and AI/ML: 47 modules, 940 judged problems, offline Python. |
 | **[Tonefer](https://github.com/pankqx/tonefer)** | End-to-end encrypted phone ↔ laptop transfer for Ubuntu, Windows, the browser and [Android](https://github.com/pankqx/tonefer-android). |
-| **[MindMirror](https://github.com/pankqx/MindMirror)** | Student wellness web app plus an ESP32 AI necklace. 1st place, CODE MEET 2026 Round 1. |
+| **[MindMirror](https://github.com/pankqx/MindMirror)** | Student wellness web app plus an ESP32 AI necklace. CODE MEET 2026, Srinivas University: No. 1 in Round 1, top 5 of 100 teams in Round 2. |
 | **[Paroh](https://github.com/pankqx/paroh-twin)** | Consent-first digital twin with what-if simulation and voice. GATEWAYS 2026. |
 | **[Flow & Magic](https://github.com/pankqx/flow-magic)** | Say a concept, get the right diagram on screen. Agent-built, 131 tests. |
 | **[BossGit](https://github.com/pankqx/Bossgit)** | Learn Git with a real Git repository running in your browser. |

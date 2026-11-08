@@ -1,0 +1,39 @@
+% =============================================================
+% config/resume-config.tex
+% Preamble, packages, and all reusable formatting commands.
+% =============================================================
+\documentclass[a4paper,10pt]{article}
+
+\usepackage[margin=0.5in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{fontawesome5}
+\usepackage{setspace}
+
+\pagestyle{empty}
+\setstretch{1.03}
+\setlength{\parindent}{0pt}
+
+% Plain black hyperlinks (no blue/colour, no boxes)
+\hypersetup{colorlinks=true, allcolors=black}
+
+\titleformat{\section}{\large\bfseries}{}{0em}{}[\titlerule]
+\titlespacing{\section}{0pt}{6pt}{3pt}
+
+\newcommand{\resumeItemListStart}{\begin{itemize}[leftmargin=1.15em, itemsep=2pt, topsep=2pt, partopsep=0pt, parsep=0pt]}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{3pt}}
+
+% Row with left entry (bold) + right-aligned date, then italic sub-line
+\newcommand{\resumeEntry}[4]{
+  \textbf{#1} \hfill \textbf{#2} \\
+  \textit{#3} \hfill \textit{#4} \\[2pt]
+}
+
+% Title + right-aligned date only (no empty sub-line, no excess gap)
+\newcommand{\resumeEntryTitle}[2]{
+  \textbf{#1} \hfill \textbf{#2} \\[-9pt]
+}

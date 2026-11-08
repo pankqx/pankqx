@@ -1,0 +1,20 @@
+% =============================================================
+% sections/header.tex — name/title left, contact stacked right
+% =============================================================
+\noindent
+\begin{minipage}[t]{0.58\textwidth}
+  \raggedright
+  {\fontsize{24}{26}\selectfont \bfseries \fullName} \\[3pt]
+  \textit{\jobTitle}
+  \ifx\locationLine\empty\else \\[3pt] {\small \locationLine}\fi
+\end{minipage}%
+\begin{minipage}[t]{0.42\textwidth}
+  \raggedleft
+  \vspace{-17pt}
+  \small
+  \faEnvelope \ \href{mailto:\emailAddr}{\emailAddr} \\[2pt]
+  \faGlobe \ \href{https://\portfolioUrl/}{\portfolioUrl} \\[2pt]
+  \faLinkedin \ \href{https://linkedin.com/in/\linkedinUser}{linkedin.com/in/\linkedinUser} \\[2pt]
+  \faGithub \ \href{https://github.com/\githubUser}{github.com/\githubUser} \\[2pt]
+\end{minipage}
+\vspace{2pt}

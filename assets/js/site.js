@@ -23,12 +23,10 @@
     if (hero) hero.classList.add('in');
   };
   const boot = $('.boot');
-  const seen = store.sget('ksp-seen');
-  if (!boot || reduce || seen) {
+  if (!boot || reduce) {
     if (boot) boot.remove();
     requestAnimationFrame(ready);
   } else {
-    store.sset('ksp-seen', '1');
     const pre = $('.boot-art', boot);
     const target = pre.textContent;
     const rows = target.split('\n');

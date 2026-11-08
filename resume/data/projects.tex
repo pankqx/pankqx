@@ -1,0 +1,46 @@
+% =============================================================
+% data/projects.tex — Featured Projects block
+% Order overridden per-role by jobs/*.tex via \renewcommand
+% =============================================================
+\newcommand{\projectEventZee}{%
+\textbf{EventZee — Role-Based Android Event Management Platform} \hfill \href{https://github.com/pankqx}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Designed and built a two-role (Student / Organiser) Android app in Kotlin on the MVVM architecture, using ViewModel, LiveData, and Firebase Firestore for real-time data sync.
+  \item Built an end-to-end registration flow — sign-up, UPI payment confirmation, and an auto-generated QR e-ticket via ZXing — replacing manual, spreadsheet-based registration.
+\resumeItemListEnd%
+}
+\newcommand{\projectQuizApp}{%
+\textbf{QuizApp — Full-Stack Online Examination Platform} \hfill \href{https://github.com/pankqx}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Developed a full-stack ASP.NET Core MVC platform enabling Admins to author quizzes and Students to attempt them with instant, auto-graded scoring.
+  \item Implemented claims-based, role-restricted auth (Admin / Student) and modeled the domain with Entity Framework Core, plus an Admin analytics dashboard.
+\resumeItemListEnd%
+}
+
+\newcommand{\projectZExtractor}{%
+\textbf{zextractor — Python Lead Generation Automation}
+\hfill
+\href{https://github.com/pankqx/zextractor}{\faGithub\ Code}
+\\[-9pt]
+\resumeItemListStart
+  \item Built a Python CLI tool to search Google Maps for jewellery stores in specified locations and export publicly available business information to CSV.
+  \item Integrated the Claude API as an optional workflow for generating personalized outreach openings from collected business data.
+\resumeItemListEnd%
+}
+
+% Default order
+\newcommand{\projectsContent}{%
+\projectEventZee
+\projectQuizApp
+\projectZExtractor%
+}
+
+
+% ---------- additional project blocks (role files choose / reorder) ----------
+\newcommand{\projectParoh}{%
+\textbf{Paroh — HumanTwin AI: Consent-First Digital Twin for Students} \hfill \href{https://github.com/pankqx/paroh-twin}{\faGithub\ Code} \\[-9pt]
+\resumeItemListStart
+  \item Built in a 24-hour hackathon (GATEWAYS 2026) with Next.js and TypeScript: journal data $\rightarrow$ fact extraction $\rightarrow$ user approval $\rightarrow$ visual twin state $\rightarrow$ what-if simulation $\rightarrow$ spoken recommendation.
+  \item Wrote a twin engine with Monte Carlo what-if simulation and a fidelity score, wired a hosted LLM via OpenRouter, and demoed it to judges.
+\resumeItemListEnd%
+}

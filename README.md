@@ -1,7 +1,7 @@
 # K S Pankaj
 
 **I turn ideas into products people actually use.**
-AI full-stack engineer · MCA ’27, St Aloysius, Mangaluru · Founder of [ProntoPy.com](https://prontopy.com)
+AI full-stack engineer · MCA ’27, St Aloysius · Founder of [ProntoPy.com](https://prontopy.com)
 
 **Portfolio and resumes → [pankqx.github.io/pankqx](https://pankqx.github.io/pankqx/)**
 

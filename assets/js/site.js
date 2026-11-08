@@ -271,7 +271,7 @@
       if (!en.isIntersecting) return;
       const el = en.target;
       el.classList.add('in');
-      $$('.pj-body.is-on .dw, .flag .dw', el).forEach((d) => d.classList.add('in'));
+      $$('.pj-body.is-on .dw, .flag .dw, .build-art .dw', el).forEach((d) => d.classList.add('in'));
       if (el.matches('.dw')) el.classList.add('in');
       $$('[data-count]', el).forEach(countUp);
       io.unobserve(el);

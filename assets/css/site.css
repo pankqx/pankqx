@@ -571,3 +571,4 @@ main { position: relative; z-index: 2; }
 .build-text p { margin: 0; color: var(--ink-2); max-width: 46ch; }
 .build-art { margin: 0; }
 .build-art .art { width: 100%; max-width: 520px; margin: 0 auto; }
+@media (min-width: 860px) { .traits { grid-template-columns: repeat(2, 1fr); } }

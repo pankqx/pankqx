@@ -118,8 +118,6 @@
     if (isReady) return;
     isReady = true;
     doc.classList.add('ready');
-    const hero = $('.cover-art .dw');
-    if (hero) hero.classList.add('in');
   };
   const boot = $('.boot');
   if (!boot || reduce) {
@@ -279,7 +277,7 @@
       io.unobserve(el);
     });
   }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
-  $$('.rv, .sh, .circuit, .flag .dw').forEach((el) => io.observe(el));
+  $$('.rv, .sh, .circuit, .flag .dw, .build-art .dw').forEach((el) => io.observe(el));
 
   /* ---------- SMIL: pause off-screen, never run with reduced motion ---------- */
   const arts = $$('svg.art');

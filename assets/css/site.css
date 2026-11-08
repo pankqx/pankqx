@@ -540,3 +540,34 @@ main { position: relative; z-index: 2; }
 }
 .boot-log { min-height: 10.6em; }
 .boot-skip { z-index: 2; }
+
+/* ---------- Rev B.2 · calmer hero ---------- */
+.cover { justify-content: center; padding-top: calc(var(--bar-h) + clamp(48px, 9vw, 110px)); padding-bottom: clamp(48px, 6vw, 80px); }
+.cover .hello { margin-bottom: 10px; }
+.cover .dim { margin: 22px 0 clamp(30px, 4vw, 52px); }
+@media (min-width: 1000px) { .name { font-size: clamp(90px, 12.2vw, 196px); } }
+.cover-row { display: grid; gap: 26px; align-items: start; }
+@media (min-width: 1000px) { .cover-row { grid-template-columns: 1.1fr 0.9fr; gap: clamp(40px, 6vw, 96px); } }
+.cover .statement { font-size: clamp(30px, 4vw, 56px); line-height: 1.05; max-width: 15ch; margin: 0; }
+.cover-side { display: flex; flex-direction: column; }
+.cover .cover-sub { font-size: clamp(17px, 1.5vw, 19px); line-height: 1.6; margin: 0 0 30px; max-width: 42ch; }
+.cover .status { margin-top: 30px; }
+.cover .stats { margin-top: clamp(56px, 7vw, 96px); }
+@media (max-width: 600px) {
+  .cover-meta { display: none; }
+  .cover { min-height: auto; padding-top: calc(var(--bar-h) + 56px); }
+  .cover .hello { margin-bottom: 14px; }
+  .cover .statement { max-width: 13ch; }
+  .cover-cta { flex-direction: column; align-items: stretch; gap: 12px; }
+  .cover-cta .btn { justify-content: space-between; }
+}
+
+/* ---------- How I work: the AI line + the build-loop drawing ---------- */
+.build { display: grid; gap: 28px; align-items: center; margin-bottom: clamp(30px, 4vw, 48px); padding-bottom: clamp(26px, 3.4vw, 40px); border-bottom: 1px dashed var(--rule); }
+@media (min-width: 1000px) { .build { grid-template-columns: 1fr 1fr; gap: 48px; } }
+.build-text .mono { display: block; margin-bottom: 14px; }
+.build-h { margin: 0 0 16px; font-size: clamp(28px, 3vw, 44px); font-weight: 750; font-stretch: 94%; letter-spacing: -0.02em; line-height: 1.08; max-width: 18ch; text-wrap: balance; }
+.build-h .serif { font-weight: 400; font-size: 1.05em; }
+.build-text p { margin: 0; color: var(--ink-2); max-width: 46ch; }
+.build-art { margin: 0; }
+.build-art .art { width: 100%; max-width: 520px; margin: 0 auto; }

@@ -1,6 +1,6 @@
 # K S Pankaj
 
-**I build enterprise software with AI, in less time and at less cost.**
+**I turn ideas into products people actually use.**
 AI full-stack engineer · MCA ’27, St Aloysius, Mangaluru · Founder of [ProntoPy.com](https://prontopy.com)
 
 **Portfolio and resumes → [pankqx.github.io/pankqx](https://pankqx.github.io/pankqx/)**

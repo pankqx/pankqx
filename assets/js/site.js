@@ -13,105 +13,6 @@
     sset: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) { /* ignore */ } },
   };
 
-  /* ---------- fireworks behind the loader: rockets, bursts, crackles ---------- */
-  const fireworks = (canvas, host) => {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return () => {};
-    const css = getComputedStyle(doc);
-    const blueprint = doc.getAttribute('data-theme') === 'blueprint';
-    const signal = css.getPropertyValue('--signal').trim() || '#ff4e1b';
-    const palette = blueprint ? [signal, '#ffc24b', '#eaf1fa', '#7fd1ff', '#ff8fb1'] : [signal, '#f2a900', '#d6336c', '#ff7a45', '#1f9e74'];
-    const sparkle = blueprint ? ['#ffffff', '#ffe08a'] : ['#f2a900', signal];
-    let W = 0, H = 0, k = 1;
-    const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = canvas.clientWidth; H = canvas.clientHeight;
-      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      k = Math.max(0.6, Math.min(1.35, Math.min(W, H) / 680));
-    };
-    size();
-    addEventListener('resize', size);
-    const rnd = (a, b) => a + Math.random() * (b - a);
-    const pick = (a) => a[(Math.random() * a.length) | 0];
-    const rockets = [], parts = [];
-    const small = W < 600;
-    const launch = () => {
-      const x = rnd(0.08, 0.92) * W, top = rnd(0.08, 0.4) * H, g = 0.11 * k;
-      rockets.push({ x, y: H + 8, px: x, py: H + 8, vx: rnd(-0.7, 0.7) * k, vy: -Math.sqrt(2 * g * (H + 8 - top)), g, color: pick(palette) });
-    };
-    const burst = (x, y, color) => {
-      const kind = Math.random(); // < .3 ring · < .82 peony · else willow
-      const n = Math.round(rnd(55, 85) * (small ? 0.65 : 1));
-      const alt = pick(palette);
-      for (let i = 0; i < n; i++) {
-        const a = (i / n) * Math.PI * 2 + rnd(-0.06, 0.06);
-        const sp = (kind < 0.3 ? rnd(3.1, 3.5) : rnd(0.7, 4.6)) * k;
-        const willow = kind >= 0.82;
-        parts.push({ x, y, px: x, py: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, age: 0,
-          life: willow ? rnd(90, 130) : rnd(50, 90), color: willow ? '#f2a900' : (Math.random() < 0.72 ? color : alt),
-          w: rnd(1.3, 2.3) * k, drag: willow ? 0.972 : 0.984, grav: (willow ? 0.07 : 0.045) * k, crackle: !willow && Math.random() < 0.22 });
-      }
-      parts.push({ flash: true, x, y, age: 0, life: 12, r: 46 * k, color });
-    };
-    const crack = (x, y) => {
-      for (let i = 0; i < 5; i++) {
-        const a = rnd(0, Math.PI * 2), sp = rnd(0.6, 2) * k;
-        parts.push({ x, y, px: x, py: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, age: 0, life: rnd(8, 16), color: pick(sparkle), w: 1.2 * k, drag: 0.9, grav: 0, twinkle: true });
-      }
-    };
-    const start = performance.now();
-    let last = start, next = 120, finale = false, alive = true;
-    const frame = (now) => {
-      if (!alive) return;
-      const dt = Math.max(0, Math.min(3, (now - last) / 16.67)), e = Math.max(0, now - start);
-      last = now;
-      ctx.clearRect(0, 0, W, H);
-      if (e > next && e < 4400) { launch(); if (Math.random() < 0.3) launch(); next = e + rnd(240, 480); }
-      if (!finale && e > 3700) { finale = true; for (let i = 0; i < (small ? 4 : 6); i++) setTimeout(launch, i * 70); }
-      ctx.lineCap = 'round';
-      for (let i = rockets.length - 1; i >= 0; i--) {
-        const r = rockets[i];
-        r.px = r.x; r.py = r.y;
-        r.vy += r.g * dt; r.x += r.vx * dt; r.y += r.vy * dt;
-        const tail = ctx.createLinearGradient(r.x, r.y, r.x - r.vx * 7, r.y - r.vy * 7);
-        tail.addColorStop(0, r.color); tail.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.strokeStyle = tail; ctx.lineWidth = 2.2 * k;
-        ctx.beginPath(); ctx.moveTo(r.x - r.vx * 7, r.y - r.vy * 7); ctx.lineTo(r.x, r.y); ctx.stroke();
-        ctx.fillStyle = r.color; ctx.beginPath(); ctx.arc(r.x, r.y, 2 * k, 0, Math.PI * 2); ctx.fill();
-        if (Math.random() < 0.5) parts.push({ x: r.x, y: r.y + 4, px: r.x, py: r.y + 4, vx: rnd(-0.4, 0.4), vy: rnd(0.4, 1.4), age: 0, life: rnd(10, 22), color: pick(sparkle), w: 1.1 * k, drag: 0.94, grav: 0.02, twinkle: true });
-        if (r.vy >= -0.6) { burst(r.x, r.y, r.color); rockets.splice(i, 1); }
-      }
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const p = parts[i];
-        p.age += dt;
-        if (p.age >= p.life) { parts.splice(i, 1); continue; }
-        const t = p.age / p.life;
-        if (p.flash) {
-          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-          g.addColorStop(0, p.color); g.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.globalAlpha = (1 - t) * 0.35; ctx.fillStyle = g;
-          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-          continue;
-        }
-        p.px = p.x; p.py = p.y;
-        const d = Math.pow(p.drag, dt);
-        p.vx *= d; p.vy = p.vy * d + p.grav * dt;
-        p.x += p.vx * dt; p.y += p.vy * dt;
-        ctx.globalAlpha = p.twinkle ? Math.random() * (1 - t) : (1 - t * t);
-        ctx.strokeStyle = p.color; ctx.lineWidth = p.w;
-        const len = p.twinkle ? 1 : (p.grav > 0.06 * k ? 12 : 8);
-        ctx.beginPath(); ctx.moveTo(p.x - p.vx * len, p.y - p.vy * len); ctx.lineTo(p.x + 0.01, p.y + 0.01); ctx.stroke();
-        if (!p.twinkle && t < 0.7) { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.w * 0.9, 0, Math.PI * 2); ctx.fill(); }
-        if (p.crackle && t > 0.72) { p.crackle = false; crack(p.x, p.y); }
-      }
-      ctx.globalAlpha = 1;
-      requestAnimationFrame(frame);
-    };
-    requestAnimationFrame(frame);
-    return () => { alive = false; removeEventListener('resize', size); };
-  };
-
   /* ---------- ASCII boot loader ---------- */
   let isReady = false;
   const ready = () => {
@@ -135,8 +36,6 @@
     const logs = $$('.boot-log p', boot);
     const track = $('.boot-bar .track', boot), pc = $('.boot-bar .pc', boot);
     const BAR = 28, ART = 2600, TOTAL = 4700;
-    const fxCanvas = $('.boot-fx', boot);
-    const stopFx = fxCanvas ? fireworks(fxCanvas, boot) : () => {};
     const t0 = performance.now();
     let done = false, raf = 0;
     const paint = (p) => {
@@ -163,7 +62,7 @@
       track.innerHTML = '[<b>' + '#'.repeat(BAR) + '</b>]';
       pc.textContent = '100%';
       setTimeout(() => { boot.classList.add('is-done'); ready(); }, 260);
-      setTimeout(() => { stopFx(); boot.remove(); }, 1200);
+      setTimeout(() => boot.remove(), 1200);
     };
     const tick = (now) => {
       const t = Math.max(0, now - t0);
@@ -222,7 +121,7 @@
       const hot = e.target.closest && e.target.closest('a, button, [data-cursor]');
       hotLabel = hot ? (hot.getAttribute('data-cursor') || 'OPEN') : '';
       cur.classList.toggle('is-hot', !!hot);
-      cur.classList.remove('is-hidden');
+      cur.classList.toggle('is-hidden', !!(e.target.closest && e.target.closest('.game-box')));
       if (!raf) raf = requestAnimationFrame(paint);
     }, { passive: true });
     addEventListener('scroll', () => { if (!raf && x > -999) raf = requestAnimationFrame(paint); }, { passive: true });
@@ -689,113 +588,120 @@
     });
   }
 
-  /* ---------- KSP-01 in 3D, drawn with characters ---------- */
-  const c3 = $('.c3d');
-  if (c3) {
-    const BM = { K: ['1...1', '1..1.', '1.1..', '11...', '1.1..', '1..1.', '1...1'], S: ['.1111', '1....', '1....', '.111.', '....1', '....1', '1111.'], P: ['1111.', '1...1', '1...1', '1111.', '1....', '1....', '1....'] };
-    const H = 0.14, ST = 0.02;
-    const lx0 = -0.8, lx1 = 0.8, lz0 = -0.46, lz1 = 0.46;
-    const mark = (x, z) => {
-      if (Math.hypot(x + 0.78, z - 0.76) < 0.1) return 2;
-      if (Math.abs(x) > 0.93 || Math.abs(z) > 0.93) return 3;
-      if (x < lx0 || x > lx1 || z < lz0 || z > lz1) return 0;
-      const c = Math.min(16, Math.floor(((x - lx0) / (lx1 - lx0)) * 17));
-      const r = Math.min(6, Math.floor(((lz1 - z) / (lz1 - lz0)) * 7));
-      const li = Math.floor(c / 6), lc = c % 6;
-      if (li > 2 || lc === 5) return 0;
-      return BM['KSP'[li]][r][lc] === '1' ? 1 : 0;
-    };
-    const pts = [];
-    const add = (x, y, z, nx, ny, nz, m) => pts.push(x, y, z, nx, ny, nz, m || 0);
-    const box = (x0, x1, y0, y1, z0, z1, top) => {
-      const rng = (a, b) => { const o = []; for (let v = a; v <= b + 1e-9; v += ST) o.push(v); if (o[o.length - 1] < b - 1e-6) o.push(b); return o; };
-      const X = rng(x0, x1), Y = rng(y0, y1), Z = rng(z0, z1);
-      X.forEach((x) => Z.forEach((z) => { add(x, y1, z, 0, 1, 0, top ? mark(x, z) : 0); add(x, y0, z, 0, -1, 0); }));
-      X.forEach((x) => Y.forEach((y) => { add(x, y, z1, 0, 0, 1); add(x, y, z0, 0, 0, -1); }));
-      Z.forEach((z) => Y.forEach((y) => { add(x1, y, z, 1, 0, 0); add(x0, y, z, -1, 0, 0); }));
-    };
-    box(-1, 1, -H, H, -1, 1, true);
-    for (let i = 0; i < 7; i++) {
-      const t = -0.75 + i * 0.25, w = 0.05;
-      box(1, 1.3, -0.07, -0.02, t - w, t + w); box(-1.3, -1, -0.07, -0.02, t - w, t + w);
-      box(t - w, t + w, -0.07, -0.02, 1, 1.3); box(t - w, t + w, -0.07, -0.02, -1.3, -1);
-    }
-    const PT = new Float32Array(pts);
-    const RAMP = '.,-~:;=!*#$@';
-    let cols = 84, rows = 42, K1 = 80, A = -1.0, B = 0.35, vA = 0, vB = 0, drag = null, visible = true, clock = 0;
+  /* ---------- HTTP Dino: a tiny ASCII runner ---------- */
+  const gbox = $('.game-box');
+  if (gbox) {
+    const scr = $('.game-screen', gbox), scoreEl = $('[data-score]', gbox), bestEl = $('[data-best]', gbox);
+    const ROWS = 12, GROUND = 11;
+    const DINO = [
+      ['           __ ', '          / _)', '   .-^^^-/ /  ', '__/       /   ', '<__.|_|-|_|   '],
+      ['           __ ', '          / _)', '   .-^^^-/ /  ', '__/       /   ', '<__./_/-\\_\\   '],
+    ];
+    const BUGS = [
+      { art: ['\\_/', '(o)'], w: 3, h: 2 },
+      { art: ['\\|/', '(o)', '/|\\'], w: 3, h: 3 },
+      { art: ['404'], w: 3, h: 1 },
+      { art: ['}{', '}{'], w: 2, h: 2 },
+    ];
+    const COFFEE = { art: ['c[_]'], w: 4, h: 1 };
+    const QUIPS = ['Even I ship bugs sometimes.', 'That one is in production now.', 'Classic Friday deploy.', 'Needs more coffee.', 'The bug says hi.'];
+    let bonus = 0, cols = 60, state = 'ready', y = 0, vy = 0, x = 2, speed = 20, dist = 0, score = 0, best = 0, items = [], clouds = [], gap = 30, frame = 0, flash = '', flashT = 0, quip = '', raf = 0, last = 0, onScreen = false;
+    try { best = parseInt(localStorage.getItem('ksp-dino-best') || '0', 10) || 0; } catch (e) { best = 0; }
+    const pad4 = (n) => String(n).padStart(4, '0');
+    bestEl.textContent = pad4(best);
     const fit = () => {
-      const w = c3.parentElement.clientWidth;
-      cols = w < 520 ? 56 : 84;
-      rows = Math.round(cols * 0.5);
-      c3.style.fontSize = (w / (cols * 0.6)).toFixed(2) + 'px';
-      K1 = cols * 1.3;
+      const fs = innerWidth < 600 ? 12 : 13;
+      scr.style.fontSize = fs + 'px';
+      cols = Math.max(34, Math.min(80, Math.floor(gbox.clientWidth / (fs * 0.6)) - 2));
     };
     fit();
     addEventListener('resize', fit);
-    const out = [], zb = new Float32Array(200 * 100);
-    const render = () => {
-      const n = cols * rows;
-      out.length = n; out.fill(' ');
-      zb.fill(0, 0, n);
-      const ca = Math.cos(A), sa = Math.sin(A), cb = Math.cos(B), sb = Math.sin(B);
-      const K2 = 4.2, KY = K1 * (0.6 / 1.1);
-      for (let i = 0; i < PT.length; i += 7) {
-        const x = PT[i], y = PT[i + 1], z = PT[i + 2];
-        const x1 = x * cb + z * sb, z1 = -x * sb + z * cb;
-        const y2 = y * ca - z1 * sa, z2 = y * sa + z1 * ca;
-        const ooz = 1 / (z2 + K2);
-        const xp = (cols / 2 + K1 * ooz * x1) | 0, yp = (rows / 2 - KY * ooz * y2) | 0;
-        if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
-        const idx = xp + yp * cols;
-        if (ooz <= zb[idx]) continue;
-        const nx = PT[i + 3], ny = PT[i + 4], nz = PT[i + 5];
-        const nz1 = -nx * sb + nz * cb;
-        const ny2 = ny * ca - nz1 * sa, nz2 = ny * sa + nz1 * ca;
-        if (nz2 > 0.2) continue; // facing away
-        zb[idx] = ooz;
-        const L = ny2 * 0.55 - nz2 * 0.6 + nx * 0.25;
-        const m = PT[i + 6];
-        if (m === 1) { out[idx] = L > 0.2 ? '@' : '#'; continue; }
-        if (m === 2) { out[idx] = 'O'; continue; }
-        if (m === 3) { out[idx] = L > 0.2 ? '#' : '='; continue; }
-        const top = ny > 0.5;
-        out[idx] = L > 0 ? RAMP[Math.min(top ? 4 : 11, 1 + ((L * (top ? 5 : 11)) | 0))] : '.';
-      }
-      let s = '';
-      for (let r = 0; r < rows; r++) s += out.slice(r * cols, r * cols + cols).join('') + (r < rows - 1 ? '\n' : '');
-      c3.textContent = s;
+    const reset = () => {
+      y = 0; vy = 0; speed = 20; dist = 0; score = 0; bonus = 0; items = []; gap = cols * 0.7; flash = ''; flashT = 0;
+      clouds = [{ x: cols * 0.3, row: 1 }, { x: cols * 0.8, row: 0 }];
+      scoreEl.textContent = pad4(0);
     };
-    let last = performance.now();
+    reset();
+    const G = 95, V0 = 31;
+    const jump = () => {
+      if (state === 'ready' || state === 'over') { reset(); state = 'run'; last = performance.now(); loop(last); return; }
+      if (y <= 0.01) vy = V0;
+    };
+    const spawn = () => {
+      if (Math.random() < 0.22) items.push({ ...COFFEE, x: cols + 2, lift: 4 + ((Math.random() * 2) | 0), coffee: true });
+      else { const b = BUGS[(Math.random() * BUGS.length) | 0]; items.push({ ...b, x: cols + 2, lift: 0 }); }
+      gap = Math.max(16, speed * (0.85 + Math.random() * 0.9));
+    };
+    const draw = () => {
+      const ch = Array.from({ length: ROWS }, () => new Array(cols).fill(' '));
+      const cl = Array.from({ length: ROWS }, () => new Array(cols).fill(''));
+      const put = (r, c, str, cls) => { for (let k = 0; k < str.length; k++) { const cc = c + k; if (r >= 0 && r < ROWS && cc >= 0 && cc < cols && str[k] !== ' ') { ch[r][cc] = str[k]; cl[r][cc] = cls || ''; } } };
+      clouds.forEach((c) => put(c.row, Math.round(c.x), '.-~~~-.', 'm'));
+      const off = Math.floor(dist) % 7;
+      for (let c = 0; c < cols; c++) { ch[GROUND][c] = (c + off) % 7 === 0 ? '.' : '_'; cl[GROUND][c] = 'm'; }
+      items.forEach((it) => it.art.forEach((line, i) => put(GROUND - it.h - it.lift + i, Math.round(it.x), line, it.coffee ? 'c' : 'b')));
+      const legs = state === 'run' && y <= 0.01 ? (Math.floor(dist / 2) % 2) : 0;
+      const top = GROUND - 5 - Math.round(y);
+      DINO[legs].forEach((line, i) => put(top + i, x, line, 'd'));
+      const center = (r, str, cls) => put(r, Math.max(0, Math.floor((cols - str.length) / 2)), str, cls);
+      if (state === 'ready') { center(2, 'HTTP DINO', 'b'); center(3, 'tap or press space to jump'); center(4, '(my hackathon team was called this)', 'm'); }
+      if (state === 'over') { center(2, `BUG GOT YOU · score ${score}`, 'b'); center(3, quip); center(4, 'tap to try again', 'm'); }
+      if (flashT > 0) center(1, flash, 'c');
+      let html = '';
+      for (let r = 0; r < ROWS; r++) {
+        let cur = '', run = '';
+        const flush = () => { if (!run) return; html += cur ? `<span class="g-${cur}">${run}</span>` : run; run = ''; };
+        for (let c = 0; c < cols; c++) {
+          const k = cl[r][c]; let t = ch[r][c];
+          t = t === '<' ? '&lt;' : t === '>' ? '&gt;' : t === '&' ? '&amp;' : t;
+          if (k !== cur) { flush(); cur = k; }
+          run += t;
+        }
+        flush();
+        if (r < ROWS - 1) html += '\n';
+      }
+      scr.innerHTML = html;
+    };
+    const hit = (it) => {
+      const top = GROUND - 5 - y; // dino top row (float)
+      const dx0 = x + 4, dx1 = x + 12, dy0 = top + 1.6, dy1 = top + 4.6;
+      const ix0 = it.x, ix1 = it.x + it.w - 0.2, iy0 = GROUND - it.h - it.lift, iy1 = GROUND - it.lift - 0.2;
+      return dx0 < ix1 && dx1 > ix0 && dy0 < iy1 && dy1 > iy0;
+    };
     const loop = (now) => {
-      const dt = Math.min(3, Math.max(0, (now - last) / 16.67)); last = now;
-      if (!drag) {
-        clock += dt;
-        B += vB * dt; vB *= Math.pow(0.95, dt);
-        A += vA * dt; vA *= Math.pow(0.92, dt);
-        const sway = 0.5 * Math.sin(clock * 0.018);
-        const home = Math.round(B / (Math.PI * 2)) * Math.PI * 2 + sway;
-        if (Math.abs(vB) < 0.01) B += (home - B) * 0.03 * dt;
-        A += (-1.0 + 0.12 * Math.sin(clock * 0.011) - A) * 0.03 * dt;
+      cancelAnimationFrame(raf);
+      if (state !== 'run' || !onScreen) { draw(); return; }
+      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
+      speed = Math.min(42, speed + dt * 0.6);
+      const dx = speed * dt;
+      dist += dx; gap -= dx;
+      if (gap <= 0) spawn();
+      vy -= G * dt; y = Math.max(0, y + vy * dt); if (y === 0 && vy < 0) vy = 0;
+      clouds.forEach((c) => { c.x -= dx * 0.25; if (c.x < -8) { c.x = cols + Math.random() * 10; c.row = (Math.random() * 2) | 0; } });
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        it.x -= dx;
+        if (it.x < -6) { items.splice(i, 1); continue; }
+        if (hit(it)) {
+          if (it.coffee) { items.splice(i, 1); bonus += 10; flash = '+10 · caffeinated'; flashT = 0.9; continue; }
+          state = 'over'; quip = QUIPS[(Math.random() * QUIPS.length) | 0];
+          if (score > best) { best = score; bestEl.textContent = pad4(best); try { localStorage.setItem('ksp-dino-best', String(best)); } catch (e) { /* ignore */ } }
+          draw(); return;
+        }
       }
-      render();
-      if (visible && !reduce) requestAnimationFrame(loop);
+      score = Math.floor(dist / 4) + bonus;
+      scoreEl.textContent = pad4(score);
+      if (flashT > 0) flashT -= dt;
+      draw();
+      raf = requestAnimationFrame(loop);
     };
-    render();
-    if (!reduce) {
-      new IntersectionObserver((en) => { const was = visible; visible = en[0].isIntersecting; if (visible && !was) { last = performance.now(); requestAnimationFrame(loop); } }).observe(c3);
-      requestAnimationFrame(loop);
-    }
-    c3.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY }; c3.setPointerCapture(e.pointerId); });
-    c3.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      drag = { x: e.clientX, y: e.clientY };
-      B += dx * 0.012; A = Math.max(-1.5, Math.min(0.6, A - dy * 0.012));
-      vB = dx * 0.012; vA = -dy * 0.006;
-      if (reduce) render();
-    });
-    const end = () => { drag = null; };
-    c3.addEventListener('pointerup', end); c3.addEventListener('pointercancel', end);
+    gbox.addEventListener('pointerdown', (e) => { e.preventDefault(); gbox.focus({ preventScroll: true }); jump(); });
+    gbox.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'Enter') { e.preventDefault(); jump(); } });
+    new IntersectionObserver((en) => {
+      onScreen = en[0].isIntersecting;
+      if (onScreen && state === 'run') { last = performance.now(); raf = requestAnimationFrame(loop); }
+    }, { threshold: 0.3 }).observe(gbox);
+    draw();
   }
 
   /* ---------- for the curious ones with DevTools open ---------- */

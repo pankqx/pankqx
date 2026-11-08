@@ -530,3 +530,13 @@ main { position: relative; z-index: 2; }
   .trait .art { width: 52px; height: 52px; grid-row: span 3; }
   .trait h3 { margin: 0; }
 }
+
+/* boot fireworks */
+.boot-fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.boot-in { position: relative; z-index: 1; }
+.boot-in::before {
+  content: ''; position: absolute; inset: -70px -60px; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, var(--paper) 62%, color-mix(in srgb, var(--paper) 60%, transparent) 82%, transparent);
+}
+.boot-log { min-height: 10.6em; }
+.boot-skip { z-index: 2; }

@@ -13,6 +13,105 @@
     sset: (k, v) => { try { sessionStorage.setItem(k, v); } catch (e) { /* ignore */ } },
   };
 
+  /* ---------- fireworks behind the loader: rockets, bursts, crackles ---------- */
+  const fireworks = (canvas, host) => {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return () => {};
+    const css = getComputedStyle(doc);
+    const blueprint = doc.getAttribute('data-theme') === 'blueprint';
+    const signal = css.getPropertyValue('--signal').trim() || '#ff4e1b';
+    const palette = blueprint ? [signal, '#ffc24b', '#eaf1fa', '#7fd1ff', '#ff8fb1'] : [signal, '#f2a900', '#d6336c', '#ff7a45', '#1f9e74'];
+    const sparkle = blueprint ? ['#ffffff', '#ffe08a'] : ['#f2a900', signal];
+    let W = 0, H = 0, k = 1;
+    const size = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = canvas.clientWidth; H = canvas.clientHeight;
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      k = Math.max(0.6, Math.min(1.35, Math.min(W, H) / 680));
+    };
+    size();
+    addEventListener('resize', size);
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const pick = (a) => a[(Math.random() * a.length) | 0];
+    const rockets = [], parts = [];
+    const small = W < 600;
+    const launch = () => {
+      const x = rnd(0.08, 0.92) * W, top = rnd(0.08, 0.4) * H, g = 0.11 * k;
+      rockets.push({ x, y: H + 8, px: x, py: H + 8, vx: rnd(-0.7, 0.7) * k, vy: -Math.sqrt(2 * g * (H + 8 - top)), g, color: pick(palette) });
+    };
+    const burst = (x, y, color) => {
+      const kind = Math.random(); // < .3 ring · < .82 peony · else willow
+      const n = Math.round(rnd(55, 85) * (small ? 0.65 : 1));
+      const alt = pick(palette);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 + rnd(-0.06, 0.06);
+        const sp = (kind < 0.3 ? rnd(3.1, 3.5) : rnd(0.7, 4.6)) * k;
+        const willow = kind >= 0.82;
+        parts.push({ x, y, px: x, py: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, age: 0,
+          life: willow ? rnd(90, 130) : rnd(50, 90), color: willow ? '#f2a900' : (Math.random() < 0.72 ? color : alt),
+          w: rnd(1.3, 2.3) * k, drag: willow ? 0.972 : 0.984, grav: (willow ? 0.07 : 0.045) * k, crackle: !willow && Math.random() < 0.22 });
+      }
+      parts.push({ flash: true, x, y, age: 0, life: 12, r: 46 * k, color });
+    };
+    const crack = (x, y) => {
+      for (let i = 0; i < 5; i++) {
+        const a = rnd(0, Math.PI * 2), sp = rnd(0.6, 2) * k;
+        parts.push({ x, y, px: x, py: y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, age: 0, life: rnd(8, 16), color: pick(sparkle), w: 1.2 * k, drag: 0.9, grav: 0, twinkle: true });
+      }
+    };
+    const start = performance.now();
+    let last = start, next = 120, finale = false, alive = true;
+    const frame = (now) => {
+      if (!alive) return;
+      const dt = Math.max(0, Math.min(3, (now - last) / 16.67)), e = Math.max(0, now - start);
+      last = now;
+      ctx.clearRect(0, 0, W, H);
+      if (e > next && e < 4400) { launch(); if (Math.random() < 0.3) launch(); next = e + rnd(240, 480); }
+      if (!finale && e > 3700) { finale = true; for (let i = 0; i < (small ? 4 : 6); i++) setTimeout(launch, i * 70); }
+      ctx.lineCap = 'round';
+      for (let i = rockets.length - 1; i >= 0; i--) {
+        const r = rockets[i];
+        r.px = r.x; r.py = r.y;
+        r.vy += r.g * dt; r.x += r.vx * dt; r.y += r.vy * dt;
+        const tail = ctx.createLinearGradient(r.x, r.y, r.x - r.vx * 7, r.y - r.vy * 7);
+        tail.addColorStop(0, r.color); tail.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.strokeStyle = tail; ctx.lineWidth = 2.2 * k;
+        ctx.beginPath(); ctx.moveTo(r.x - r.vx * 7, r.y - r.vy * 7); ctx.lineTo(r.x, r.y); ctx.stroke();
+        ctx.fillStyle = r.color; ctx.beginPath(); ctx.arc(r.x, r.y, 2 * k, 0, Math.PI * 2); ctx.fill();
+        if (Math.random() < 0.5) parts.push({ x: r.x, y: r.y + 4, px: r.x, py: r.y + 4, vx: rnd(-0.4, 0.4), vy: rnd(0.4, 1.4), age: 0, life: rnd(10, 22), color: pick(sparkle), w: 1.1 * k, drag: 0.94, grav: 0.02, twinkle: true });
+        if (r.vy >= -0.6) { burst(r.x, r.y, r.color); rockets.splice(i, 1); }
+      }
+      for (let i = parts.length - 1; i >= 0; i--) {
+        const p = parts[i];
+        p.age += dt;
+        if (p.age >= p.life) { parts.splice(i, 1); continue; }
+        const t = p.age / p.life;
+        if (p.flash) {
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+          g.addColorStop(0, p.color); g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.globalAlpha = (1 - t) * 0.35; ctx.fillStyle = g;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+          continue;
+        }
+        p.px = p.x; p.py = p.y;
+        const d = Math.pow(p.drag, dt);
+        p.vx *= d; p.vy = p.vy * d + p.grav * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        ctx.globalAlpha = p.twinkle ? Math.random() * (1 - t) : (1 - t * t);
+        ctx.strokeStyle = p.color; ctx.lineWidth = p.w;
+        const len = p.twinkle ? 1 : (p.grav > 0.06 * k ? 12 : 8);
+        ctx.beginPath(); ctx.moveTo(p.x - p.vx * len, p.y - p.vy * len); ctx.lineTo(p.x + 0.01, p.y + 0.01); ctx.stroke();
+        if (!p.twinkle && t < 0.7) { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.w * 0.9, 0, Math.PI * 2); ctx.fill(); }
+        if (p.crackle && t > 0.72) { p.crackle = false; crack(p.x, p.y); }
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(frame);
+    };
+    requestAnimationFrame(frame);
+    return () => { alive = false; removeEventListener('resize', size); };
+  };
+
   /* ---------- ASCII boot loader ---------- */
   let isReady = false;
   const ready = () => {
@@ -37,7 +136,9 @@
     const esc = (ch) => (ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : ch === '&' ? '&amp;' : ch);
     const logs = $$('.boot-log p', boot);
     const track = $('.boot-bar .track', boot), pc = $('.boot-bar .pc', boot);
-    const BAR = 28, ART = 1300, TOTAL = 1900;
+    const BAR = 28, ART = 2600, TOTAL = 4700;
+    const fxCanvas = $('.boot-fx', boot);
+    const stopFx = fxCanvas ? fireworks(fxCanvas, boot) : () => {};
     const t0 = performance.now();
     let done = false, raf = 0;
     const paint = (p) => {
@@ -64,12 +165,12 @@
       track.innerHTML = '[<b>' + '#'.repeat(BAR) + '</b>]';
       pc.textContent = '100%';
       setTimeout(() => { boot.classList.add('is-done'); ready(); }, 260);
-      setTimeout(() => boot.remove(), 1200);
+      setTimeout(() => { stopFx(); boot.remove(); }, 1200);
     };
     const tick = (now) => {
-      const t = now - t0;
+      const t = Math.max(0, now - t0);
       paint(Math.min(1, t / ART));
-      logs.forEach((l, i) => { if (t > 120 + i * 330) l.classList.add('on'); });
+      logs.forEach((l, i) => { if (t > 200 + i * 760) l.classList.add('on'); });
       const n = Math.round(Math.min(1, t / TOTAL) * BAR);
       track.innerHTML = '[<b>' + '#'.repeat(n) + '</b>' + '.'.repeat(BAR - n) + ']';
       pc.textContent = Math.round(Math.min(1, t / TOTAL) * 100) + '%';

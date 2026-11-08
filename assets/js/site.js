@@ -120,7 +120,7 @@
     doc.classList.add('ready');
   };
   const boot = $('.boot');
-  if (!boot || reduce) {
+  if (!boot || reduce || doc.classList.contains('wipe-in')) {
     if (boot) boot.remove();
     requestAnimationFrame(ready);
   } else {
@@ -374,7 +374,7 @@
     if (hFill) hFill.style.width = (p * 100) + '%';
     let active = '';
     sheets.forEach((s) => { if (s.getBoundingClientRect().top < innerHeight * 0.4) active = '#' + s.id; });
-    navLinks.forEach((a) => a.classList.toggle('is-active', a.getAttribute('href') === active));
+    navLinks.forEach((a) => a.classList.toggle('is-active', !!active && (a.dataset.sec || '').split(' ').includes(active.slice(1))));
   };
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   const relayout = () => { buildPads(); onScroll(); };
@@ -477,6 +477,325 @@
     });
     const m = location.hash.match(/^#cv-(\w+)/);
     if (m && CV[m[1]]) setTimeout(() => open(m[1]), 400);
+  }
+
+
+  /* =====================================================================
+     ASCII: page wipe, decoding headings, typing, sprites, 3D chip
+     ===================================================================== */
+  const GLYPHS = '!<>-_\\/[]{}=+*^?#%&';
+  const NOISE = '.:-=+*#%@/\\|<>[]{}01';
+  const pickCh = (set) => set[(Math.random() * set.length) | 0];
+
+  /* ---------- page wipe between Home and About ---------- */
+  const wipe = $('.wipe');
+  const wipeGrid = () => {
+    const lh = 15, cw = 13 * 0.6;
+    const cols = Math.ceil(innerWidth / cw) + 2, rows = Math.ceil(innerHeight / lh) + 1;
+    wipe.style.setProperty('--lh', lh + 'px');
+    wipe.innerHTML = '';
+    const els = [];
+    for (let r = 0; r < rows; r++) { const d = document.createElement('div'); d.className = 'wr'; wipe.appendChild(d); els.push(d); }
+    const jitter = els.map(() => Math.random() * 0.22);
+    return { els, cols, rows, jitter };
+  };
+  const noiseLine = (cols, thin) => { let o = ''; for (let i = 0; i < cols; i++) o += Math.random() < thin ? ' ' : pickCh(NOISE); return o; };
+  const wipeIn = () => {
+    if (!wipe || !doc.classList.contains('wipe-in')) return;
+    if (reduce) { doc.classList.remove('wipe-in'); return; }
+    const { els, cols, rows, jitter } = wipeGrid();
+    const t0 = performance.now(), dur = 620;
+    const step = (now) => {
+      const p = Math.min(1, Math.max(0, now - t0) / dur);
+      els.forEach((el, i) => {
+        const at = (i / rows) * 0.72 + jitter[i];
+        const local = (p - at + 0.25) / 0.25;
+        if (p >= at) { el.classList.add('off'); return; }
+        el.classList.toggle('edge', local > 0.55);
+        el.textContent = noiseLine(cols, Math.max(0.15, Math.min(0.95, local)));
+      });
+      if (p < 1) requestAnimationFrame(step);
+      else { wipe.innerHTML = ''; doc.classList.remove('wipe-in'); }
+    };
+    requestAnimationFrame(step);
+  };
+  const wipeOut = (go) => {
+    if (!wipe || reduce) { go(); return; }
+    const { els, cols, rows, jitter } = wipeGrid();
+    els.forEach((el) => el.classList.add('off'));
+    wipe.classList.add('on');
+    const t0 = performance.now(), dur = 420;
+    const step = (now) => {
+      const p = Math.min(1, Math.max(0, now - t0) / dur);
+      els.forEach((el, i) => {
+        const at = (i / rows) * 0.75 + jitter[i] * 0.6;
+        if (p < at) return;
+        el.classList.remove('off');
+        el.classList.toggle('edge', p - at < 0.12);
+        el.textContent = noiseLine(cols, 0.15);
+      });
+      if (p < 1) requestAnimationFrame(step); else setTimeout(go, 40);
+    };
+    requestAnimationFrame(step);
+  };
+  const isSheet = (u) => /\/(index\.html|about\.html)?$/.test(u.pathname);
+  const norm = (pth) => pth.replace(/index\.html$/, '');
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    let url;
+    try { url = new URL(a.getAttribute('href'), location.href); } catch (err) { return; }
+    if (url.origin !== location.origin || !isSheet(url) || norm(url.pathname) === norm(location.pathname)) return;
+    e.preventDefault();
+    wipeOut(() => { store.sset('ksp-wipe', '1'); location.href = url.href; });
+  });
+  addEventListener('pageshow', (e) => { if (e.persisted && wipe) { wipe.innerHTML = ''; wipe.classList.remove('on'); doc.classList.remove('wipe-in'); } });
+  wipeIn();
+
+  /* ---------- headings decode from random characters ---------- */
+  const decodeEl = (el, dur = 800) => {
+    if (reduce || el.dataset.decoded) return;
+    el.dataset.decoded = '1';
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = []; let nd;
+    while ((nd = walker.nextNode())) if (nd.nodeValue.trim()) nodes.push({ n: nd, text: nd.nodeValue });
+    const total = nodes.reduce((acc, o) => acc + o.text.length, 0) || 1;
+    let k = 0;
+    nodes.forEach((o) => { o.at = Array.from(o.text, () => (k++ / total) * 0.55 + Math.random() * 0.45); });
+    const t0 = performance.now();
+    const step = (now) => {
+      const p = Math.min(1, Math.max(0, now - t0) / dur);
+      nodes.forEach((o) => {
+        let out = '';
+        for (let i = 0; i < o.text.length; i++) { const ch = o.text[i]; out += (ch === ' ' || p >= o.at[i]) ? ch : pickCh(GLYPHS); }
+        o.n.nodeValue = out;
+      });
+      if (p < 1) requestAnimationFrame(step); else nodes.forEach((o) => { o.n.nodeValue = o.text; });
+    };
+    requestAnimationFrame(step);
+  };
+  const dio = new IntersectionObserver((entries) => entries.forEach((en) => {
+    if (en.isIntersecting) { dio.unobserve(en.target); setTimeout(() => decodeEl(en.target), 120); }
+  }), { threshold: 0.5 });
+  $$('[data-decode]').forEach((el) => dio.observe(el));
+
+  /* ---------- terminal typing (about.txt) ---------- */
+  const typeEl = (el) => {
+    if (reduce || el.dataset.typed) return;
+    el.dataset.typed = '1';
+    const ps = $$('p:not(.term-cursor)', el);
+    const texts = ps.map((p) => p.textContent);
+    el.style.minHeight = el.offsetHeight + 'px';
+    ps.forEach((p) => { p.textContent = ''; });
+    let pi = 0, ci = 0;
+    const tick = () => {
+      for (let n = 0; n < 3 && pi < ps.length; n++) {
+        ci++;
+        ps[pi].textContent = texts[pi].slice(0, ci);
+        if (ci >= texts[pi].length) { pi++; ci = 0; }
+      }
+      if (pi < ps.length) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
+  const tio = new IntersectionObserver((entries) => entries.forEach((en) => {
+    if (en.isIntersecting) { tio.unobserve(en.target); setTimeout(() => typeEl(en.target), 300); }
+  }), { threshold: 0.3 });
+  $$('[data-type]').forEach((el) => tio.observe(el));
+
+  /* ---------- letter sprites ---------- */
+  const scramble = (target, p) => Array.from(target, (ch) => (ch === ' ' || ch === '\n' || Math.random() < p) ? ch : pickCh(NOISE)).join('');
+  const SPRITES = {
+    arrow: () => { let i = 0; return { ms: 90, next: () => { i = (i + 1) % 8; return (' '.repeat(i) + '--->').padEnd(11, ' '); } }; },
+    cup: (el) => {
+      const base = el.textContent.split('\n');
+      const a = ['    ( (     ', '     ) )    '], b = ['     ) )    ', '    ( (     '];
+      let f = 0;
+      return { ms: 480, next: () => { f ^= 1; const s = f ? b : a; return [s[0], s[1], ...base.slice(2)].join('\n'); } };
+    },
+    fast: () => {
+      const topics = ['kotlin', 'arduino c', 'angular', 'next.js', 'your stack'];
+      let t = 0, n = 0, hold = 0;
+      return { ms: 70, next: () => {
+        if (hold > 0) { hold--; } else if (n < 14) { n++; } else { hold = 12; n = 15; }
+        if (n === 15 && hold === 0) { n = 0; t = (t + 1) % topics.length; }
+        const k = Math.min(n, 14);
+        const tail = k < 14 ? `${Math.round((k / 14) * 100)}%` : (topics[t] === 'your stack' ? 'ready :)' : 'ok');
+        return `learning ${topics[t]}\n[${'#'.repeat(k)}${'.'.repeat(14 - k)}] ${tail}`;
+      } };
+    },
+    adapt: () => {
+      const shapes = [
+        ['+----------+', '| o o o    |', '|----------|', '|          |', '+----------+', '  same me · web'],
+        ['  .------.  ', '  |      |  ', '  |      |  ', '  |  ()  |  ', "  '------'  ", '  same me · android'],
+        ['+----------+', '|          |', '+----++----+', '     ||     ', '   ======   ', '  same me · desktop'],
+        ['  | | | |   ', ' +-------+  ', '-|  ESP  |- ', ' +-------+  ', '  | | | |   ', '  same me · hardware'],
+      ].map((l) => l.join('\n'));
+      let i = 0, f = 0;
+      return { ms: 60, next: () => {
+        f++;
+        if (f > 26) { f = 0; i = (i + 1) % shapes.length; }
+        return f < 6 ? scramble(shapes[i], f / 6) : shapes[i];
+      } };
+    },
+    team: () => {
+      const F = [
+        ['  o       o  ', ' /|\\     /|\\ ', ' / \\     / \\ ', '             '],
+        ['  o/     \\o  ', ' /|       |\\ ', ' / \\     / \\ ', '             '],
+        ['    o/ \\o    ', '   /|   |\\   ', '   / \\ / \\   ', '             '],
+        ['    o/*\\o    ', '   /|   |\\   ', '   / \\ / \\   ', '  high five! '],
+      ].map((l) => l.join('\n'));
+      const seq = [0, 0, 0, 1, 2, 3, 3, 3, 3, 2, 1, 0];
+      let i = 0;
+      return { ms: 260, next: () => { i = (i + 1) % seq.length; return F[seq[i]]; } };
+    },
+    create: () => {
+      const art = ['    \\ | /     ', '  -- (o) --   ', '    / | \\     ', '   /\\     /\\  ', '__/  \\/\\_/  \\_'].join('\n');
+      const idx = []; for (let i = 0; i < art.length; i++) if (art[i] !== ' ' && art[i] !== '\n') idx.push(i);
+      const order = idx.sort(() => Math.random() - 0.5);
+      let n = 0, dir = 1, hold = 0;
+      return { ms: 45, next: () => {
+        if (hold > 0) hold--;
+        else { n += dir * 2; if (n >= order.length) { n = order.length; dir = -1; hold = 40; } else if (n <= 0) { n = 0; dir = 1; hold = 8; } }
+        const on = new Set(order.slice(0, n));
+        return Array.from(art, (ch, i) => (ch === '\n' || on.has(i)) ? ch : ' ').join('');
+      } };
+    },
+  };
+  $$('[data-sprite]').forEach((el) => {
+    const make = SPRITES[el.getAttribute('data-sprite')];
+    if (!make || reduce) return;
+    const sp = make(el);
+    let timer = 0;
+    const run = (on) => {
+      clearInterval(timer);
+      if (on) timer = setInterval(() => { el.textContent = sp.next(); }, sp.ms);
+    };
+    new IntersectionObserver((en) => run(en[0].isIntersecting)).observe(el);
+    el._sprite = sp;
+  });
+
+  /* ---------- coffee refills ---------- */
+  const cup = $('.cup');
+  if (cup) {
+    let cups = 3;
+    const label = $('[data-coffee]', cup), hint = $('.cup-txt > span', cup);
+    cup.addEventListener('click', () => {
+      cups++;
+      label.textContent = '#' + cups;
+      hint.textContent = cups < 6 ? 'Tap for a refill' : cups < 9 ? 'Okay, that is a lot of coffee' : 'Shipping a feature. Please hold.';
+      cup.animate([{ transform: 'rotate(0)' }, { transform: 'rotate(-4deg)' }, { transform: 'rotate(3deg)' }, { transform: 'rotate(0)' }], { duration: 420 });
+    });
+  }
+
+  /* ---------- KSP-01 in 3D, drawn with characters ---------- */
+  const c3 = $('.c3d');
+  if (c3) {
+    const BM = { K: ['1...1', '1..1.', '1.1..', '11...', '1.1..', '1..1.', '1...1'], S: ['.1111', '1....', '1....', '.111.', '....1', '....1', '1111.'], P: ['1111.', '1...1', '1...1', '1111.', '1....', '1....', '1....'] };
+    const H = 0.14, ST = 0.02;
+    const lx0 = -0.8, lx1 = 0.8, lz0 = -0.46, lz1 = 0.46;
+    const mark = (x, z) => {
+      if (Math.hypot(x + 0.78, z - 0.76) < 0.1) return 2;
+      if (Math.abs(x) > 0.93 || Math.abs(z) > 0.93) return 3;
+      if (x < lx0 || x > lx1 || z < lz0 || z > lz1) return 0;
+      const c = Math.min(16, Math.floor(((x - lx0) / (lx1 - lx0)) * 17));
+      const r = Math.min(6, Math.floor(((lz1 - z) / (lz1 - lz0)) * 7));
+      const li = Math.floor(c / 6), lc = c % 6;
+      if (li > 2 || lc === 5) return 0;
+      return BM['KSP'[li]][r][lc] === '1' ? 1 : 0;
+    };
+    const pts = [];
+    const add = (x, y, z, nx, ny, nz, m) => pts.push(x, y, z, nx, ny, nz, m || 0);
+    const box = (x0, x1, y0, y1, z0, z1, top) => {
+      const rng = (a, b) => { const o = []; for (let v = a; v <= b + 1e-9; v += ST) o.push(v); if (o[o.length - 1] < b - 1e-6) o.push(b); return o; };
+      const X = rng(x0, x1), Y = rng(y0, y1), Z = rng(z0, z1);
+      X.forEach((x) => Z.forEach((z) => { add(x, y1, z, 0, 1, 0, top ? mark(x, z) : 0); add(x, y0, z, 0, -1, 0); }));
+      X.forEach((x) => Y.forEach((y) => { add(x, y, z1, 0, 0, 1); add(x, y, z0, 0, 0, -1); }));
+      Z.forEach((z) => Y.forEach((y) => { add(x1, y, z, 1, 0, 0); add(x0, y, z, -1, 0, 0); }));
+    };
+    box(-1, 1, -H, H, -1, 1, true);
+    for (let i = 0; i < 7; i++) {
+      const t = -0.75 + i * 0.25, w = 0.05;
+      box(1, 1.3, -0.07, -0.02, t - w, t + w); box(-1.3, -1, -0.07, -0.02, t - w, t + w);
+      box(t - w, t + w, -0.07, -0.02, 1, 1.3); box(t - w, t + w, -0.07, -0.02, -1.3, -1);
+    }
+    const PT = new Float32Array(pts);
+    const RAMP = '.,-~:;=!*#$@';
+    let cols = 84, rows = 42, K1 = 80, A = -1.0, B = 0.35, vA = 0, vB = 0, drag = null, visible = true, clock = 0;
+    const fit = () => {
+      const w = c3.parentElement.clientWidth;
+      cols = w < 520 ? 56 : 84;
+      rows = Math.round(cols * 0.5);
+      c3.style.fontSize = (w / (cols * 0.6)).toFixed(2) + 'px';
+      K1 = cols * 1.3;
+    };
+    fit();
+    addEventListener('resize', fit);
+    const out = [], zb = new Float32Array(200 * 100);
+    const render = () => {
+      const n = cols * rows;
+      out.length = n; out.fill(' ');
+      zb.fill(0, 0, n);
+      const ca = Math.cos(A), sa = Math.sin(A), cb = Math.cos(B), sb = Math.sin(B);
+      const K2 = 4.2, KY = K1 * (0.6 / 1.1);
+      for (let i = 0; i < PT.length; i += 7) {
+        const x = PT[i], y = PT[i + 1], z = PT[i + 2];
+        const x1 = x * cb + z * sb, z1 = -x * sb + z * cb;
+        const y2 = y * ca - z1 * sa, z2 = y * sa + z1 * ca;
+        const ooz = 1 / (z2 + K2);
+        const xp = (cols / 2 + K1 * ooz * x1) | 0, yp = (rows / 2 - KY * ooz * y2) | 0;
+        if (xp < 0 || xp >= cols || yp < 0 || yp >= rows) continue;
+        const idx = xp + yp * cols;
+        if (ooz <= zb[idx]) continue;
+        const nx = PT[i + 3], ny = PT[i + 4], nz = PT[i + 5];
+        const nz1 = -nx * sb + nz * cb;
+        const ny2 = ny * ca - nz1 * sa, nz2 = ny * sa + nz1 * ca;
+        if (nz2 > 0.2) continue; // facing away
+        zb[idx] = ooz;
+        const L = ny2 * 0.55 - nz2 * 0.6 + nx * 0.25;
+        const m = PT[i + 6];
+        if (m === 1) { out[idx] = L > 0.2 ? '@' : '#'; continue; }
+        if (m === 2) { out[idx] = 'O'; continue; }
+        if (m === 3) { out[idx] = L > 0.2 ? '#' : '='; continue; }
+        const top = ny > 0.5;
+        out[idx] = L > 0 ? RAMP[Math.min(top ? 4 : 11, 1 + ((L * (top ? 5 : 11)) | 0))] : '.';
+      }
+      let s = '';
+      for (let r = 0; r < rows; r++) s += out.slice(r * cols, r * cols + cols).join('') + (r < rows - 1 ? '\n' : '');
+      c3.textContent = s;
+    };
+    let last = performance.now();
+    const loop = (now) => {
+      const dt = Math.min(3, Math.max(0, (now - last) / 16.67)); last = now;
+      if (!drag) {
+        clock += dt;
+        B += vB * dt; vB *= Math.pow(0.95, dt);
+        A += vA * dt; vA *= Math.pow(0.92, dt);
+        const sway = 0.5 * Math.sin(clock * 0.018);
+        const home = Math.round(B / (Math.PI * 2)) * Math.PI * 2 + sway;
+        if (Math.abs(vB) < 0.01) B += (home - B) * 0.03 * dt;
+        A += (-1.0 + 0.12 * Math.sin(clock * 0.011) - A) * 0.03 * dt;
+      }
+      render();
+      if (visible && !reduce) requestAnimationFrame(loop);
+    };
+    render();
+    if (!reduce) {
+      new IntersectionObserver((en) => { const was = visible; visible = en[0].isIntersecting; if (visible && !was) { last = performance.now(); requestAnimationFrame(loop); } }).observe(c3);
+      requestAnimationFrame(loop);
+    }
+    c3.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY }; c3.setPointerCapture(e.pointerId); });
+    c3.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      drag = { x: e.clientX, y: e.clientY };
+      B += dx * 0.012; A = Math.max(-1.5, Math.min(0.6, A - dy * 0.012));
+      vB = dx * 0.012; vA = -dy * 0.006;
+      if (reduce) render();
+    });
+    const end = () => { drag = null; };
+    c3.addEventListener('pointerup', end); c3.addEventListener('pointercancel', end);
   }
 
   /* ---------- for the curious ones with DevTools open ---------- */

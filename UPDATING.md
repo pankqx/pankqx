@@ -26,7 +26,7 @@ The three PDFs are built from the LaTeX files in [`resume/`](resume/). **Don't u
 
 ## Projects on the site
 
-All the content lives in `index.html`. Search the file (Ctrl+F) for the markers below.
+The site has two pages. **`index.html`** (Home) holds your projects and resumes, and **`about.html`** holds everything about you. For projects, edit `index.html` and search (Ctrl+F) for the markers below.
 
 ### Edit a featured project
 
@@ -60,3 +60,17 @@ Search for `Also built`. Copy one link, including the dot after it, and paste it
 
 - Hero numbers: search for `class="stats`. Change both the `data-count="30"` attribute and the number between the tags.
 - ProntoPy numbers: search for `class="specs"`.
+
+---
+
+## The About page (`about.html`)
+
+| What you want to change | Search for |
+|---|---|
+| The typed intro ("$ cat about.txt") | `class="term-body"`, then edit the `<p>` lines |
+| Fast learner / Adaptable / Team player / Creative | `class="trait trait-a`, then edit the `<h3>` title and the `<p>` text |
+| Experience (the git log) | `class="gl-row`. Each job is one row: `gl-h` is the fake commit code, `gl-w` the date, `gl-t` the title, and the `<p>` the line under it. To add a job, copy a whole row that starts with `<span class="gl-g"><b>*</b>` |
+| Toolbox | `class="tr-row`. Each folder is one row, and each tool is a `<span>` inside `tr-items` |
+| Contact | `<!-- 05 · CONTACT -->` |
+
+The letter animations (the progress bar, shapes, high five and drawing), the 3D chip and the page wipe live in `assets/js/site.js`. Leave those to Claude unless you want to experiment.

@@ -73,4 +73,4 @@ Search for `Also built`. Copy one link, including the dot after it, and paste it
 | Toolbox | `class="tr-row`. Each folder is one row, and each tool is a `<span>` inside `tr-items` |
 | Contact | `<!-- 05 · CONTACT -->` |
 
-The letter animations (the progress bar, shapes, high five and drawing), the HTTP Dino game and the page wipe live in `assets/js/site.js`. Leave those to Claude unless you want to experiment.
+The letter animations (the progress bar, shapes, high five and drawing), the games (HTTP Dino, Catch the skills, Ship it, Squash the bugs, Memory) and the page wipe live in `assets/js/site.js`. To change the words that fall in Catch the skills, search for `const SKILLS`. For the memory cards, search for `const PAIRS`. Leave those to Claude unless you want to experiment.

@@ -704,6 +704,258 @@
     draw();
   }
 
+  /* =====================================================================
+     Mini games at the end of each About section
+     ===================================================================== */
+  const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+  const pad2 = (n) => String(Math.max(0, n)).padStart(2, '0');
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const escHtml = (t) => (t === '<' ? '&lt;' : t === '>' ? '&gt;' : t === '&' ? '&amp;' : t);
+  const gridHtml = (ch, cl) => ch.map((row, r) => {
+    let html = '', cur = '', run = '';
+    const flush = () => { if (run) html += cur ? `<span class="g-${cur}">${run}</span>` : run; run = ''; };
+    row.forEach((c, i) => { const k = cl[r][i]; if (k !== cur) { flush(); cur = k; } run += escHtml(c); });
+    flush();
+    return html;
+  }).join('\n');
+
+  /* ---- 1 · catch the skills ---- */
+  const gCatch = $('[data-game="catch"]');
+  if (gCatch) {
+    const box = $('.game-box', gCatch), scr = $('.game-screen', gCatch), scoreEl = $('[data-score]', gCatch), timeEl = $('[data-time]', gCatch);
+    const ROWS = 11, BASKET = '\\_______/', BW = BASKET.length, ROUND = 20;
+    const SKILLS = ['react', 'kotlin', 'python', 'git', 'sql', 'docker', 'esp32', 'next.js', 'java', 'node', 'c#', 'angular'];
+    let cols = 50, bx = 20, target = null, items = [], state = 'ready', score = 0, left = ROUND, spawnIn = 0, raf = 0, last = 0, onScreen = false, flash = '', flashT = 0, keys = 0;
+    const fit = () => { const fs = innerWidth < 600 ? 12 : 13; scr.style.fontSize = fs + 'px'; cols = Math.max(30, Math.min(80, Math.floor(box.clientWidth / (fs * 0.6)) - 2)); bx = Math.min(bx, cols - BW); };
+    fit(); addEventListener('resize', fit);
+    const draw = () => {
+      const ch = Array.from({ length: ROWS }, () => new Array(cols).fill(' '));
+      const cl = Array.from({ length: ROWS }, () => new Array(cols).fill(''));
+      const put = (r, c, str, k) => { for (let i = 0; i < str.length; i++) { const cc = c + i; if (r >= 0 && r < ROWS && cc >= 0 && cc < cols && str[i] !== ' ') { ch[r][cc] = str[i]; cl[r][cc] = k || ''; } } };
+      const center = (r, str, k) => put(r, Math.max(0, Math.floor((cols - str.length) / 2)), str, k);
+      items.forEach((it) => put(Math.floor(it.y), Math.round(it.x), it.t, it.k));
+      put(ROWS - 1, Math.round(bx), BASKET, 'd');
+      if (state === 'ready') { center(2, 'CATCH THE SKILLS', 'b'); center(3, 'drag, tap or use arrow keys to move'); center(4, 'skills +1 · coffee +3 · bugs }{ -2', 'm'); center(6, 'tap to start', 'm'); }
+      if (state === 'over') {
+        center(2, `you caught ${score} skill${score === 1 ? '' : 's'}`, 'b');
+        center(3, score >= 15 ? 'fast learner, confirmed.' : score >= 8 ? 'that is roughly my week.' : 'the bugs had a good day.');
+        center(5, 'tap to play again', 'm');
+      }
+      if (flashT > 0) center(0, flash, 'c');
+      scr.innerHTML = gridHtml(ch, cl);
+    };
+    const start = () => { items = []; score = 0; left = ROUND; spawnIn = 0; state = 'run'; scoreEl.textContent = pad2(0); timeEl.textContent = String(ROUND); last = performance.now(); raf = requestAnimationFrame(loop); };
+    const loop = (now) => {
+      cancelAnimationFrame(raf);
+      if (state !== 'run' || !onScreen) { draw(); return; }
+      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
+      left -= dt;
+      if (left <= 0) { left = 0; state = 'over'; timeEl.textContent = '0'; draw(); return; }
+      timeEl.textContent = String(Math.ceil(left));
+      if (keys) bx += keys * 34 * dt;
+      if (target !== null) bx += Math.sign(target - bx) * Math.min(Math.abs(target - bx), 70 * dt);
+      bx = Math.max(0, Math.min(cols - BW, bx));
+      spawnIn -= dt;
+      if (spawnIn <= 0) {
+        const r = Math.random();
+        const t = r < 0.68 ? SKILLS[(Math.random() * SKILLS.length) | 0] : r < 0.92 ? '}{' : 'c[_]';
+        const k = r < 0.68 ? '' : r < 0.92 ? 'b' : 'c';
+        items.push({ t, k, x: Math.random() * (cols - t.length), y: 0, v: 3.2 + Math.random() * 2 + (ROUND - left) * 0.12 });
+        spawnIn = 0.45 + Math.random() * 0.45;
+      }
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        it.y += it.v * dt;
+        if (Math.floor(it.y) >= ROWS - 1) {
+          const overlap = it.x + it.t.length > bx + 0.5 && it.x < bx + BW - 0.5;
+          if (overlap) {
+            if (it.k === 'b') { score -= 2; flash = 'ouch, a bug · -2'; }
+            else if (it.k === 'c') { score += 3; flash = 'coffee · +3'; }
+            else { score += 1; flash = `+1 ${it.t}`; }
+            score = Math.max(0, score); flashT = 0.7;
+            scoreEl.textContent = pad2(score);
+          }
+          items.splice(i, 1);
+        }
+      }
+      if (flashT > 0) flashT -= dt;
+      draw();
+      raf = requestAnimationFrame(loop);
+    };
+    const toCol = (e) => { const r = scr.getBoundingClientRect(); return ((e.clientX - r.left) / r.width) * cols - BW / 2; };
+    scr.style.touchAction = 'pan-y';
+    box.addEventListener('pointerdown', (e) => {
+      box.focus({ preventScroll: true });
+      if (state !== 'run') { start(); return; }
+      target = toCol(e);
+    });
+    box.addEventListener('pointermove', (e) => { if (state === 'run' && (e.pointerType === 'mouse' || e.buttons)) target = toCol(e); });
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); target = null; keys = e.key === 'ArrowLeft' ? -1 : 1; if (state !== 'run') start(); }
+      if ((e.key === ' ' || e.key === 'Enter') && state !== 'run') { e.preventDefault(); start(); }
+    });
+    box.addEventListener('keyup', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys = 0; });
+    new IntersectionObserver((en) => { onScreen = en[0].isIntersecting; if (onScreen && state === 'run') { last = performance.now(); raf = requestAnimationFrame(loop); } }, { threshold: 0.3 }).observe(box);
+    bx = (cols - BW) / 2;
+    draw();
+  }
+
+  /* ---- 2 · ship it: tap the steps in order ---- */
+  const gShip = $('[data-game="ship"]');
+  if (gShip) {
+    const STEPS = ['Spec', 'Slice', 'Generate', 'Verify', 'Ship'];
+    const line = $('[data-line]', gShip), btns = $('[data-btns]', gShip), msg = $('[data-msg]', gShip);
+    const timeEl = $('[data-time]', gShip), bestEl = $('[data-best]', gShip);
+    let next = 0, t0 = 0, timer = 0, penalty = 0, running = false, best = parseFloat(lsGet('ksp-ship-best') || '0') || 0;
+    if (best) bestEl.textContent = best.toFixed(1) + 's';
+    const drawLine = () => { line.textContent = STEPS.map((st, i) => (i < next ? `[${st.toUpperCase()}]` : '[ ? ]')).join(' -> '); };
+    const elapsed = () => (performance.now() - t0) / 1000 + penalty;
+    const setup = () => {
+      next = 0; penalty = 0; running = false; clearInterval(timer);
+      timeEl.textContent = '0.0s';
+      msg.textContent = 'Tap the five steps in the right order. The clock starts on your first tap.';
+      btns.innerHTML = '';
+      shuffle(STEPS.slice()).forEach((st) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'ship-btn mono'; b.textContent = `[ ${st} ]`; b.dataset.step = st;
+        b.addEventListener('click', () => press(b));
+        btns.appendChild(b);
+      });
+      drawLine();
+    };
+    const press = (b) => {
+      if (b.disabled) return;
+      if (!running && next === 0) { running = true; t0 = performance.now(); timer = setInterval(() => { timeEl.textContent = elapsed().toFixed(1) + 's'; }, 100); }
+      if (b.dataset.step === STEPS[next]) {
+        b.disabled = true; b.classList.add('done'); next++; drawLine();
+        msg.textContent = next < STEPS.length ? ['Good. Next?', 'Nice.', 'Keep going.', 'Almost there.'][next - 1] : '';
+        if (next === STEPS.length) {
+          clearInterval(timer); running = false;
+          const t = elapsed();
+          timeEl.textContent = t.toFixed(1) + 's';
+          const rec = !best || t < best;
+          if (rec) { best = t; lsSet('ksp-ship-best', String(t)); bestEl.textContent = t.toFixed(1) + 's'; }
+          msg.innerHTML = `Shipped in ${t.toFixed(1)}s. Production is safe.${rec ? ' New best!' : ''} <button type="button" class="link ship-again">Play again</button>`;
+          $('.ship-again', msg).addEventListener('click', setup);
+        }
+      } else {
+        penalty += 1;
+        msg.textContent = `Not yet. "${b.dataset.step}" comes later. +1s`;
+        b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 260 });
+      }
+    };
+    setup();
+  }
+
+  /* ---- 3 · squash the bugs, spare the features ---- */
+  const gSq = $('[data-game="squash"]');
+  if (gSq) {
+    const holesEl = $('[data-holes]', gSq), msg = $('[data-msg]', gSq), scoreEl = $('[data-score]', gSq), timeEl = $('[data-time]', gSq);
+    const ART = {
+      empty: ['     ', '     ', '\\___/'],
+      bug: [' \\_/ ', '-(o)-', '\\___/'],
+      feature: ['  +  ', '[new]', '\\___/'],
+      splat: [' \\*/ ', ' x_x ', '\\___/'],
+      oops: ['  !  ', 'oops ', '\\___/'],
+    };
+    const N = 8, ROUND = 20;
+    const holes = [];
+    let state = 'ready', score = 0, left = ROUND, tick = 0, clock = 0;
+    for (let i = 0; i < N; i++) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'hole';
+      b.setAttribute('aria-label', 'Hole ' + (i + 1));
+      const pre = document.createElement('pre'); pre.className = 'sprite'; pre.textContent = ART.empty.join('\n');
+      b.appendChild(pre); holesEl.appendChild(b);
+      const h = { b, pre, kind: 'empty', until: 0 };
+      b.addEventListener('click', () => hit(h));
+      holes.push(h);
+    }
+    const show = (h, kind, ms) => { h.kind = kind; h.until = performance.now() + ms; h.pre.textContent = ART[kind].join('\n'); h.b.dataset.kind = kind; };
+    const hit = (h) => {
+      if (state !== 'run') { start(); return; }
+      if (h.kind === 'bug') { score++; show(h, 'splat', 350); }
+      else if (h.kind === 'feature') { score = Math.max(0, score - 3); show(h, 'oops', 500); msg.textContent = 'That was a feature! -3'; }
+      scoreEl.textContent = pad2(score);
+    };
+    const start = () => {
+      state = 'run'; score = 0; left = ROUND; scoreEl.textContent = '00'; timeEl.textContent = String(ROUND);
+      msg.textContent = 'Go! Bugs only.';
+      clock = performance.now();
+      holes.forEach((h) => show(h, 'empty', 0));
+      clearInterval(tick);
+      tick = setInterval(step, 100);
+    };
+    let spawnAt = 0;
+    const step = () => {
+      const now = performance.now();
+      left = ROUND - (now - clock) / 1000;
+      timeEl.textContent = String(Math.max(0, Math.ceil(left)));
+      holes.forEach((h) => { if (h.kind !== 'empty' && now > h.until) show(h, 'empty', 0); });
+      if (left <= 0) {
+        clearInterval(tick); state = 'over';
+        holes.forEach((h) => show(h, 'empty', 0));
+        msg.innerHTML = `Squashed ${score} bug${score === 1 ? '' : 's'}. ${score >= 18 ? 'Hired.' : score >= 10 ? 'The bugs lost.' : 'The bugs are in production now.'} <button type="button" class="link ship-again">Play again</button>`;
+        $('.ship-again', msg).addEventListener('click', start);
+        return;
+      }
+      if (now > spawnAt) {
+        const free = holes.filter((h) => h.kind === 'empty');
+        if (free.length) {
+          const h = free[(Math.random() * free.length) | 0];
+          const fast = Math.max(0, (ROUND - left) / ROUND);
+          show(h, Math.random() < 0.18 ? 'feature' : 'bug', 950 - fast * 420);
+        }
+        spawnAt = now + 520 - Math.min(260, (ROUND - left) * 14) + Math.random() * 200;
+      }
+    };
+    msg.textContent = 'Tap any hole to start. Twenty seconds.';
+  }
+
+  /* ---- 4 · memory: match the tools ---- */
+  const gMem = $('[data-game="memory"]');
+  if (gMem) {
+    const cardsEl = $('[data-cards]', gMem), msg = $('[data-msg]', gMem), movesEl = $('[data-score]', gMem), bestEl = $('[data-best]', gMem);
+    const PAIRS = [['react', '<o>'], ['python', '>>>'], ['kotlin', 'K>'], ['git', 'o-o'], ['docker', '[=]'], ['esp32', '|#|']];
+    let open = [], moves = 0, found = 0, lock = false, best = parseInt(lsGet('ksp-mem-best') || '0', 10) || 0;
+    if (best) bestEl.textContent = pad2(best);
+    const setup = () => {
+      cardsEl.innerHTML = ''; open = []; moves = 0; found = 0; lock = false; movesEl.textContent = '00';
+      msg.textContent = 'Flip two cards at a time. Find all six pairs.';
+      shuffle(PAIRS.flatMap((p) => [p, p]).slice()).forEach(([name, icon]) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'card'; b.dataset.name = name;
+        b.setAttribute('aria-label', 'Hidden card');
+        b.innerHTML = `<span class="card-back mono">/ / /\n / / \n/ / /</span><span class="card-face mono"><b>${icon.replace(/[<>&]/g, escHtml)}</b>${name}</span>`;
+        b.addEventListener('click', () => flip(b));
+        cardsEl.appendChild(b);
+      });
+    };
+    const flip = (b) => {
+      if (lock || b.classList.contains('up') || b.classList.contains('matched')) return;
+      b.classList.add('up'); b.setAttribute('aria-label', b.dataset.name);
+      open.push(b);
+      if (open.length < 2) return;
+      moves++; movesEl.textContent = pad2(moves);
+      const [a, c] = open; open = [];
+      if (a.dataset.name === c.dataset.name) {
+        a.classList.add('matched'); c.classList.add('matched'); found++;
+        msg.textContent = found < PAIRS.length ? `${a.dataset.name}, matched.` : '';
+        if (found === PAIRS.length) {
+          const rec = !best || moves < best;
+          if (rec) { best = moves; lsSet('ksp-mem-best', String(moves)); bestEl.textContent = pad2(moves); }
+          msg.innerHTML = `All matched in ${moves} moves. ${moves <= 8 ? 'Sharp memory.' : 'My toolbox, now yours.'}${rec ? ' New best!' : ''} <button type="button" class="link ship-again">Play again</button>`;
+          $('.ship-again', msg).addEventListener('click', setup);
+        }
+      } else {
+        lock = true;
+        setTimeout(() => { a.classList.remove('up'); c.classList.remove('up'); a.setAttribute('aria-label', 'Hidden card'); c.setAttribute('aria-label', 'Hidden card'); lock = false; }, 750);
+      }
+    };
+    setup();
+  }
+
   /* ---------- for the curious ones with DevTools open ---------- */
   try {
     console.log('%cK S Pankaj%c\nYou opened DevTools on a portfolio. We would get along.\npankqx@gmail.com · github.com/pankqx',

@@ -664,3 +664,47 @@ main { position: relative; z-index: 2; }
 .game-screen .g-c { color: var(--signal-ink); font-weight: 500; }
 .game-screen .g-m { color: var(--ink-3); }
 .has-cursor .game-box { cursor: pointer; }
+
+/* =====================================================================
+   Mini games at the end of each About section
+   ===================================================================== */
+.mini { margin-top: clamp(30px, 4vw, 52px); }
+.mini .game-box { cursor: default; }
+.mini-cap { margin-top: 10px; }
+.mini .game-screen { min-height: calc(11 * 1.15em + 26px); }
+[data-game="catch"] .game-box { cursor: pointer; }
+
+/* ship it */
+.ship, .squash, .memory { padding: clamp(16px, 2.6vw, 26px); }
+.ship-line { font-size: 13px; letter-spacing: 0.02em; text-transform: none; color: var(--ink-2); margin-bottom: 16px; overflow-wrap: anywhere; }
+.ship-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.ship-btn { height: 46px; padding: 0 16px; border: 1px solid var(--ink); background: var(--paper); text-transform: none; letter-spacing: 0.02em; font-size: 14px; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+.ship-btn:hover { border-color: var(--signal); color: var(--signal-ink); }
+.ship-btn.done { background: var(--ink); color: var(--paper); border-color: var(--ink); cursor: default; }
+.ship-msg { margin: 14px 0 0; font-size: 13px; text-transform: none; letter-spacing: 0.01em; color: var(--ink-2); min-height: 1.5em; }
+.ship-msg .link { margin-left: 8px; font-size: 12px; color: var(--signal-ink); padding: 0; }
+
+/* squash */
+.holes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.hole { display: grid; place-items: center; padding: 12px 4px 10px; border: 1px solid var(--rule); background: color-mix(in srgb, var(--paper) 60%, var(--paper-2)); transition: border-color 0.15s, transform 0.1s; touch-action: manipulation; }
+.hole:active { transform: scale(0.96); }
+.hole .sprite { font-size: 14px; line-height: 1.15; color: var(--ink-3); }
+.hole[data-kind="bug"] { border-color: var(--signal); }
+.hole[data-kind="bug"] .sprite, .hole[data-kind="splat"] .sprite { color: var(--signal); }
+.hole[data-kind="feature"] .sprite { color: var(--ink); }
+.hole[data-kind="oops"] .sprite { color: var(--signal-ink); }
+@media (max-width: 420px) { .holes { gap: 6px; } .hole .sprite { font-size: 12px; } }
+
+/* memory */
+.cards { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+@media (max-width: 700px) { .cards { grid-template-columns: repeat(4, 1fr); gap: 8px; } }
+.card { position: relative; aspect-ratio: 3 / 4; border: 1px solid var(--ink); background: var(--paper); perspective: 600px; touch-action: manipulation; }
+.card span { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; white-space: pre; transition: opacity 0.25s, transform 0.35s var(--ease); text-transform: none; }
+.card-back { color: var(--ink-3); font-size: 12px; line-height: 1.2; background: repeating-linear-gradient(135deg, transparent 0 7px, var(--rule-2) 7px 8px); }
+.card-face { opacity: 0; transform: rotateY(90deg); font-size: 12px; align-content: center; gap: 4px; }
+.card-face b { display: block; font-size: 18px; color: var(--signal); font-weight: 500; }
+.card.up .card-back, .card.matched .card-back { opacity: 0; transform: rotateY(-90deg); }
+.card.up .card-face, .card.matched .card-face { opacity: 1; transform: none; }
+.card.matched { border-color: var(--signal); background: color-mix(in srgb, var(--signal) 8%, var(--paper)); }
+@media (min-width: 701px) { .card { aspect-ratio: 5 / 4; } }
+@media (max-width: 480px) { .ship-line { font-size: 11.5px; letter-spacing: 0; } }

@@ -1,7 +1,7 @@
 # K S Pankaj
 
 **I build enterprise software with AI, in less time and at less cost.**
-Full-stack, AI and Android developer · MCA ’27, St Aloysius, Mangaluru · Founder of [ProntoPy.com](https://prontopy.com)
+AI full-stack engineer · MCA ’27, St Aloysius, Mangaluru · Founder of [ProntoPy.com](https://prontopy.com)
 
 **Portfolio and resumes → [pankqx.github.io/pankqx](https://pankqx.github.io/pankqx/)**
 
@@ -16,6 +16,6 @@ Full-stack, AI and Android developer · MCA ’27, St Aloysius, Mangaluru · Fou
 
 **Stack:** TypeScript · React · Next.js · Angular · Node · Python · Kotlin · C# · PostgreSQL · MongoDB · Supabase · Docker · GitHub Actions · Claude Code · Codex
 
-**Contact:** [pankqx@gmail.com](mailto:pankqx@gmail.com) · [LinkedIn](https://www.linkedin.com/in/pankqz)
+**Contact:** [pankqx@gmail.com](mailto:pankqx@gmail.com) · [LinkedIn](https://www.linkedin.com/in/pankqx)
 
 <sub>This repository also hosts the portfolio site itself: plain HTML, CSS and JavaScript, every drawing hand-set in SVG. Brand guidelines: [brand sheet](https://pankqx.github.io/pankqx/brand.html).</sub>

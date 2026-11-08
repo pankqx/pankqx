@@ -27,19 +27,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install LaTeX
-        uses: teatimeguest/setup-texlive-action@v3
-        with:
-          packages: >-
-            scheme-basic
-            enumitem
-            titlesec
-            setspace
-            fontawesome5
-            lm
-
-      - name: Install PDF and image tools
-        run: sudo apt-get update -q && sudo apt-get install -y -q poppler-utils webp
+      - name: Install LaTeX and PDF tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended texlive-fonts-extra lmodern \
+            poppler-utils webp
 
       - name: Build resumes
         run: bash resume/build.sh

@@ -796,7 +796,7 @@ body::before { display: block; opacity: 0.28; }             /* a little paper gr
 .stat b { font-size: clamp(44px, 6.2vw, 92px); font-stretch: 70%; font-weight: 850; }
 .stat span { font-size: 14.5px; }
 @media (min-width: 1000px) {
-  .kolam { position: absolute; z-index: 0; top: -24px; right: var(--pad); width: clamp(250px, 25vw, 380px); margin: 0; }
+  .kolam { position: absolute; z-index: 0; top: -24px; right: var(--pad); width: clamp(230px, 22vw, 360px); margin: 0; }
   .hello, .name, .cover-row, .cover .dim { position: relative; z-index: 1; }
   .name { width: max-content; }
 }

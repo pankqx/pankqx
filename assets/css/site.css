@@ -859,3 +859,41 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .flag-code .c { color: var(--ink-3); }
 .flag-code b { color: var(--signal); font-weight: 500; }
 .flag-art { align-items: stretch; }
+
+/* =====================================================================
+   Rev G · boxed
+   Every section is a framed box with corner marks. Panels inside are boxes too.
+   ===================================================================== */
+.sheet { border-top: 0; padding: clamp(7px, 1vw, 14px) 0; }
+.cover, .about-intro { padding-top: calc(var(--bar-h) + 14px); }
+.sheet > .wrap { position: relative; width: calc(100% - 24px); max-width: var(--max); margin: 0 auto; border: 1px solid var(--rule); padding: clamp(26px, 4.4vw, 64px) clamp(18px, 3.6vw, 52px); background: color-mix(in srgb, var(--paper) 78%, transparent); }
+.sheet > .wrap::before, .sheet > .wrap::after { content: ''; position: absolute; width: 9px; height: 9px; background: var(--signal); }
+.sheet > .wrap::before { top: -5px; left: -5px; }
+.sheet > .wrap::after { bottom: -5px; right: -5px; }
+.band { background: none; padding: clamp(7px, 1vw, 14px) 0; }
+.band > .wrap { background: var(--paper); }
+.contact.band { padding-bottom: 14px; }
+.stats { gap: 10px !important; border-top: 0 !important; padding-top: 0 !important; }
+.stat { border: 1px solid var(--rule-2) !important; padding: 18px 16px !important; }
+.stat + .stat { padding-left: 16px !important; }
+.trait, .trait.trait-a { border: 1px solid var(--rule) !important; padding: 22px !important; }
+.traits { gap: 12px; }
+.gitlog, .tree, .who, .cup, .build, .circuit, .cv-list, .also, .hello-strip, .flag-body, .specs div { border: 1px solid var(--rule-2); padding: clamp(16px, 2.4vw, 28px); }
+.specs { gap: 10px; }
+.flag-art { padding: clamp(14px, 3vw, 32px); }
+.hello-strip { margin-top: 14px; }
+.next > .wrap { padding-bottom: clamp(18px, 3vw, 40px); }
+
+/* the ProntoPy chip */
+.pchip { width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
+.pchip .pc-l { fill: none; stroke: var(--ink-2); stroke-width: 1.4; }
+.pchip .pc-b { fill: var(--paper); stroke: var(--ink-2); stroke-width: 1.4; }
+.pchip .pc-ok { stroke: var(--signal); }
+.pchip .pc-p { fill: var(--paper); stroke: var(--ink-2); stroke-width: 1.4; }
+.pchip .pc-chip { fill: var(--ink); }
+.pchip .pc-dot, .pchip .pc-run { fill: var(--signal); }
+.pchip text { font-family: var(--f-mono); text-anchor: middle; }
+.pchip .pc-t { font-size: 10px; letter-spacing: 0.08em; fill: var(--ink); }
+.pchip .pc-okt { fill: var(--signal); }
+.pchip .pc-big { font-family: var(--f-sans); font-weight: 900; font-size: 44px; fill: var(--paper); }
+.pchip .pc-s { font-size: 7.5px; letter-spacing: 0.14em; fill: var(--paper); opacity: 0.75; }

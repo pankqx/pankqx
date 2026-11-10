@@ -777,3 +777,64 @@ canvas.game-screen { display: block; width: calc(100% - 36px); margin: 14px 18px
 .card.up .card-face, .card.matched .card-face { opacity: 1; transform: none; }
 .card.matched { background: color-mix(in srgb, var(--signal) 12%, var(--paper)); }
 @media (min-width: 700px) { .cards { grid-template-columns: repeat(6, 1fr); } .card { aspect-ratio: 5 / 4; } }
+
+/* =====================================================================
+   Rev E · rich
+   Still calm, but with moments: a living kolam in the hero, giant moving
+   type between sections, and full-width colour bands.
+   ===================================================================== */
+body::before { display: block; opacity: 0.28; }             /* a little paper grain */
+[data-theme='blueprint'] body::before { opacity: 0.14; }
+
+/* hero kolam */
+.cover .wrap { position: relative; }
+.kolam { margin: clamp(28px, 6vw, 44px) 0 0; }
+.kolam canvas { display: block; width: 100%; aspect-ratio: 1; touch-action: pan-y; cursor: crosshair; }
+.kolam figcaption { margin-top: 6px; text-align: center; color: var(--ink-3); }
+.kolam .k-touch { color: var(--signal-ink); }
+.cover .stats { margin-top: clamp(64px, 8vw, 110px); }
+.stat b { font-size: clamp(44px, 6.2vw, 92px); font-stretch: 70%; font-weight: 850; }
+.stat span { font-size: 14.5px; }
+@media (min-width: 1000px) {
+  .kolam { position: absolute; z-index: 0; top: -24px; right: var(--pad); width: clamp(250px, 25vw, 380px); margin: 0; }
+  .hello, .name, .cover-row, .cover .dim { position: relative; z-index: 1; }
+  .name { width: max-content; }
+}
+
+/* giant moving type */
+.marquee { overflow: hidden; padding: clamp(8px, 2vw, 24px) 0 clamp(20px, 4vw, 56px); }
+.mq-track { display: flex; width: max-content; animation: mq 46s linear infinite; font-family: var(--f-sans); font-weight: 900; font-stretch: 118%; font-size: clamp(64px, 13vw, 190px); line-height: 1; letter-spacing: -0.03em; text-transform: uppercase; white-space: nowrap; }
+.mq-track span { display: flex; align-items: center; }
+.mq-track b { font-weight: 900; }
+.mq-track em { font-style: normal; color: transparent; -webkit-text-stroke: 1.5px var(--ink); }
+.mq-track i { font-style: normal; font-size: 0.34em; color: var(--signal); margin: 0 0.5em; }
+@keyframes mq { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .mq-track { animation: none; } }
+
+/* a full-width dark band: the same components, with the colours flipped */
+.band {
+  --paper: #18181a; --paper-2: #232326; --paper-3: #2c2c30; --surface: #222225;
+  --ink: #ece8df; --ink-2: #c8c4b9; --ink-3: #96928a;
+  --rule: rgba(236, 232, 223, 0.24); --rule-2: rgba(236, 232, 223, 0.13);
+  --signal-ink: #ff7a4d;
+  background: var(--paper); color: var(--ink);
+  padding: clamp(72px, 10vw, 150px) 0;
+}
+[data-theme='blueprint'] .band { --paper: #081a30; --paper-2: #0d2440; --surface: #0d2440; --ink: #eaf1fa; --ink-2: #b4c6dc; --ink-3: #8ba3c1; }
+.band .flag-title { font-size: clamp(64px, 12vw, 168px); line-height: 0.86; }
+.contact.band { padding-bottom: clamp(28px, 4vw, 48px); margin-top: 0; }
+.contact.band .foot { margin-top: clamp(56px, 8vw, 110px); }
+
+/* the door to the About page: one loud orange block */
+.nextcard {
+  --ink: #18181a; --ink-2: #2b1a12; --ink-3: #3d2418; --signal: #18181a; --signal-ink: #18181a;
+  background: #ff4e1b; color: #18181a; padding: clamp(36px, 7vw, 96px); gap: clamp(16px, 2vw, 26px);
+}
+.nextcard .nx-t { font-size: clamp(54px, 11vw, 150px); line-height: 0.88; }
+.nextcard .nx-p { color: #2b1a12; max-width: 44ch; font-size: clamp(17px, 1.5vw, 21px); }
+.nextcard:hover { transform: none; }
+.nextcard:hover .nx-t { letter-spacing: -0.02em; }
+.nextcard .nx-t { transition: letter-spacing 0.6s var(--ease); }
+
+/* bigger, more confident headings */
+.h2 { font-size: clamp(44px, 7.6vw, 112px); line-height: 0.92; }

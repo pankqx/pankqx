@@ -530,6 +530,112 @@
   }
 
   /* =====================================================================
+     KOLAM
+     The hero drawing. A grid of dots; every dot sits in a tile. Each tile
+     corner is either round (the line loops back) or sharp (lines cross).
+     Changing those corners smoothly is what makes the pattern flow.
+     ===================================================================== */
+  const kolam = $('[data-kolam]');
+  if (kolam) {
+    const ctx = kolam.getContext('2d');
+    const N = 7, V = N + 1, MID = N / 2;      // 7 x 7 dots, 8 x 8 corners
+    const at = (i, j) => j * V + i;
+    const from = new Float32Array(V * V), to = new Float32Array(V * V), start = new Float32Array(V * V);
+    let size = 0, ts = 0, col = {}, raf = 0, seen = false, lastTouch = -1e9, lastNew = 0, hot = -1;
+    const inner = (i, j) => i > 0 && i < N && j > 0 && j < N;
+    const value = (k, now) => {
+      const p = Math.min(1, Math.max(0, (now - start[k]) / 900));
+      const e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      return from[k] + (to[k] - from[k]) * e;
+    };
+    /* set one corner and its seven mirror images, so the pattern stays symmetric */
+    const setSym = (i, j, v, now, wait) => {
+      [[i, j], [N - i, j], [i, N - j], [N - i, N - j], [j, i], [N - j, i], [j, N - i], [N - j, N - i]].forEach(([a, b]) => {
+        if (!inner(a, b)) return;
+        const k = at(a, b);
+        from[k] = value(k, now); to[k] = v; start[k] = now + wait;
+      });
+    };
+    const fresh = (now) => {
+      for (let j = 1; j <= MID; j++) for (let i = j; i <= MID; i++) {
+        const far = Math.hypot(i - MID, j - MID);
+        setSym(i, j, Math.random() < 0.62 ? 1 : 0, now, far * 170);   // ripples out from the centre
+      }
+      lastNew = now;
+    };
+    const colors = () => { const cs = getComputedStyle(kolam); col = { ink: cs.getPropertyValue('--ink').trim(), dim: cs.getPropertyValue('--ink-3').trim(), hot: cs.getPropertyValue('--signal').trim() }; };
+    const fit = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      size = kolam.clientWidth || 320;
+      kolam.width = kolam.height = Math.round(size * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ts = (size * 0.97) / (N * Math.SQRT2);
+      colors();
+    };
+    const tile = (x, y, r) => {            // a square whose four corners can each be rounded differently
+      ctx.beginPath();
+      ctx.moveTo(x + r[0], y);
+      ctx.arcTo(x + ts, y, x + ts, y + ts, r[1]);
+      ctx.arcTo(x + ts, y + ts, x, y + ts, r[2]);
+      ctx.arcTo(x, y + ts, x, y, r[3]);
+      ctx.arcTo(x, y, x + ts, y, r[0]);
+      ctx.closePath();
+      ctx.stroke();
+    };
+    const draw = (now) => {
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.translate(size / 2, size / 2);
+      ctx.rotate(Math.PI / 4);
+      ctx.translate(-N * ts / 2, -N * ts / 2);
+      ctx.lineWidth = size < 380 ? 1.4 : 1.7;
+      ctx.strokeStyle = col.ink;
+      const half = ts / 2;
+      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+        const r = [at(i, j), at(i + 1, j), at(i + 1, j + 1), at(i, j + 1)].map((k) => (1 - value(k, now)) * half);
+        tile(i * ts, j * ts, r);
+        const centre = i === (N - 1) / 2 && j === (N - 1) / 2;
+        ctx.fillStyle = centre ? col.hot : col.dim;
+        ctx.beginPath(); ctx.arc(i * ts + half, j * ts + half, centre ? 4 : 2.2, 0, 6.2832); ctx.fill();
+      }
+      if (hot >= 0) { ctx.fillStyle = col.hot; ctx.beginPath(); ctx.arc((hot % V) * ts, ((hot / V) | 0) * ts, 4, 0, 6.2832); ctx.fill(); }
+      ctx.restore();
+    };
+    const frame = (now) => {
+      raf = 0;
+      if (!seen || document.hidden) return;
+      if (!reduce && now - lastNew > 4200 && now - lastTouch > 7000) fresh(now);
+      draw(now);
+      raf = requestAnimationFrame(frame);
+    };
+    const kick = () => { if (!raf && seen) raf = requestAnimationFrame(frame); };
+    /* touch or move over it: the nearest corner flips, and the pattern follows your finger */
+    const poke = (e) => {
+      const r = kolam.getBoundingClientRect();
+      const x = e.clientX - r.left - size / 2, y = e.clientY - r.top - size / 2;
+      const c = Math.SQRT1_2;                               // undo the 45 degree turn
+      const i = Math.round(((x + y) * c + N * ts / 2) / ts), j = Math.round(((y - x) * c + N * ts / 2) / ts);
+      if (!inner(i, j)) { hot = -1; return; }
+      const k = at(i, j);
+      if (k === hot) return;
+      hot = k;
+      const now = performance.now();
+      setSym(i, j, to[k] > 0.5 ? 0 : 1, now, 0);
+      lastTouch = now;
+    };
+    kolam.addEventListener('pointerdown', poke);
+    kolam.addEventListener('pointermove', poke);
+    kolam.addEventListener('pointerleave', () => { hot = -1; });
+    new IntersectionObserver((en) => { seen = en[0].isIntersecting; kick(); }).observe(kolam);
+    document.addEventListener('visibilitychange', kick);
+    addEventListener('resize', () => { fit(); draw(performance.now()); });
+    new MutationObserver(() => { colors(); draw(performance.now()); }).observe(doc, { attributes: true, attributeFilter: ['data-theme'] });
+    fit();
+    fresh(performance.now() + (doc.classList.contains('wipe-in') || reduce ? -5000 : 4300));   // begins as plain circles, blooms as the loader lifts
+    draw(performance.now());
+  }
+
+  /* =====================================================================
      GAMES
      Five small games on the About page. Two are drawn on a <canvas>
      (HTTP Dino, Catch the skills) and three are plain buttons

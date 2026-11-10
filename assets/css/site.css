@@ -855,3 +855,7 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .cover .stats { border-top: 1px solid var(--rule); padding-top: 28px; }
 .marquee { border-top: 1px solid var(--rule); padding-top: clamp(20px, 4vw, 56px); }
 .band { background-image: none; }
+.flag-code { margin: 0; width: 100%; font-family: var(--f-mono); font-size: clamp(11.5px, 1.25vw, 14px); line-height: 1.7; color: var(--ink); white-space: pre; overflow-x: auto; text-align: left; }
+.flag-code .c { color: var(--ink-3); }
+.flag-code b { color: var(--signal); font-weight: 500; }
+.flag-art { align-items: stretch; }

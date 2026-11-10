@@ -53,7 +53,7 @@ Keep it at **six** featured projects, because the layout is designed for six. To
 Search for `Also built`. Copy one link, including the dot after it, and paste it where you want it:
 
 ```html
-<a href="https://github.com/pankqx/your-repo" target="_blank" rel="noopener" data-cursor="OPEN ↗">Your Project</a><i>·</i>
+<a href="https://github.com/pankqx/your-repo" target="_blank" rel="noopener">Your Project</a><i>·</i>
 ```
 
 ### Numbers and the ProntoPy band
@@ -74,3 +74,22 @@ Search for `Also built`. Copy one link, including the dot after it, and paste it
 | Contact | `<!-- 05 · CONTACT -->` |
 
 The letter animations (the progress bar, shapes, high five and drawing), the games (HTTP Dino, Catch the skills, Ship it, Squash the bugs, Memory) and the page wipe live in `assets/js/site.js`. To change the words that fall in Catch the skills, search for `const SKILLS`. For the memory cards, search for `const PAIRS`. Leave those to Claude unless you want to experiment.
+
+### Game settings you can safely change (`assets/js/site.js`)
+
+| What | Search for |
+|---|---|
+| How high the dino jumps, how fast it falls | `const GRAVITY = 62, JUMP = 27` |
+| Dino titles (intern, junior dev, ...) | `const RANKS` |
+| Dino game-over jokes | `const QUIPS` |
+| Words that fall in Catch the skills | `const SKILLS` |
+| Memory cards | `const PAIRS` |
+| Length of a round (seconds) | `ROUND = 20` |
+
+## The visitor counter
+
+The line "You are visitor #0421" in the footer comes from a free counting service (Abacus). Search for `VISITOR COUNTER` in `assets/js/site.js`. One visit is one browser session, and local testing is never counted. If the service is ever offline, the line simply does not show. If you move the site to your own domain, change `location.hostname === 'pankqx.github.io'` to the new domain.
+
+## The look (`assets/css/site.css`)
+
+Colours and fonts are the variables at the very top (`:root`). The block called `Rev D · quiet` near the bottom controls the spacing and the clean look: `--gap` is the space between sections, `--surface` is the soft panel colour.

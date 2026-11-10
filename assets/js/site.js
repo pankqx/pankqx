@@ -101,33 +101,6 @@
     }).catch(() => {});
   });
 
-  /* ---------- crosshair cursor ---------- */
-  const cur = $('.cursor');
-  if (cur && fine && !reduce) {
-    doc.classList.add('has-cursor');
-    const cx = $('.cx', cur), cy = $('.cy', cur), dot = $('.cdot', cur), lab = $('.clabel', cur);
-    let x = -999, y = -999, raf = 0, hotLabel = '';
-    const pad = (n) => String(Math.max(0, Math.round(n))).padStart(4, '0');
-    const paint = () => {
-      raf = 0;
-      cx.style.transform = `translateY(${y}px)`;
-      cy.style.transform = `translateX(${x}px)`;
-      dot.style.transform = `translate(${x}px, ${y}px)`;
-      lab.style.transform = `translate(${x + 16}px, ${y + 14}px)`;
-      lab.textContent = hotLabel || `X ${pad(x)} · Y ${pad(y + scrollY)}`;
-    };
-    addEventListener('pointermove', (e) => {
-      x = e.clientX; y = e.clientY;
-      const hot = e.target.closest && e.target.closest('a, button, [data-cursor]');
-      hotLabel = hot ? (hot.getAttribute('data-cursor') || 'OPEN') : '';
-      cur.classList.toggle('is-hot', !!hot);
-      cur.classList.toggle('is-hidden', !!(e.target.closest && e.target.closest('.game-box')));
-      if (!raf) raf = requestAnimationFrame(paint);
-    }, { passive: true });
-    addEventListener('scroll', () => { if (!raf && x > -999) raf = requestAnimationFrame(paint); }, { passive: true });
-    document.addEventListener('pointerleave', () => cur.classList.add('is-hidden'));
-  }
-
   /* ---------- name: letters widen under the cursor ---------- */
   const wave = $('[data-wave]');
   if (wave && fine && !reduce && wave.firstChild && wave.firstChild.nodeType === 3) {
@@ -233,28 +206,7 @@
   const bar = $('#bar');
   const sheets = $$('[data-sheet]');
   const navLinks = $$('.nav a');
-  const tv = $('.trace-v'), th = $('.trace-h');
-  const tFill = tv && $('.tfill', tv), tPulse = tv && $('.tpulse', tv), hFill = th && $('.tfill', th);
-  let pads = [];
-  const buildPads = () => {
-    if (!tv) return;
-    pads.forEach((p) => p.el.remove());
-    const H = tv.clientHeight;
-    const max = Math.max(1, doc.scrollHeight - innerHeight);
-    pads = sheets.map((s) => {
-      const el = document.createElement('a');
-      el.className = 'tpad';
-      el.href = '#' + s.id;
-      el.tabIndex = -1;
-      el.setAttribute('data-no', s.getAttribute('data-sheet'));
-      el.setAttribute('aria-label', s.getAttribute('data-title') || '');
-      el.setAttribute('data-cursor', (s.getAttribute('data-title') || '').toUpperCase());
-      const at = Math.min(1, Math.max(0, (s.offsetTop - 80) / max));
-      el.style.top = (at * H) + 'px';
-      tv.appendChild(el);
-      return { el, at };
-    });
-  };
+  const hFill = $('.trace-h .tfill');
   let ticking = false;
   const onScroll = () => {
     ticking = false;
@@ -262,25 +214,14 @@
     if (bar) bar.classList.toggle('is-scrolled', y > 24);
     const max = Math.max(1, doc.scrollHeight - innerHeight);
     const p = Math.min(1, Math.max(0, y / max));
-    if (tv && tFill) {
-      const H = tv.clientHeight;
-      tFill.style.height = (p * H) + 'px';
-      tPulse.style.top = (p * H) + 'px';
-      let c = -1;
-      pads.forEach((pd, i) => { const on = pd.at <= p + 0.002; pd.el.classList.toggle('is-on', on); if (on) c = i; });
-      pads.forEach((pd, i) => pd.el.classList.toggle('is-cur', i === c));
-    }
     if (hFill) hFill.style.width = (p * 100) + '%';
     let active = '';
     sheets.forEach((s) => { if (s.getBoundingClientRect().top < innerHeight * 0.4) active = '#' + s.id; });
     navLinks.forEach((a) => a.classList.toggle('is-active', !!active && (a.dataset.sec || '').split(' ').includes(active.slice(1))));
   };
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-  const relayout = () => { buildPads(); onScroll(); };
-  addEventListener('resize', relayout);
-  addEventListener('load', relayout);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
-  relayout();
+  addEventListener('resize', onScroll);
+  onScroll();
 
   /* ---------- index menu (phones) ---------- */
   const menu = $('#sheet-menu'), menuBtn = $('.menu-btn');
@@ -588,228 +529,332 @@
     });
   }
 
-  /* ---------- HTTP Dino: a tiny ASCII runner ---------- */
-  const gbox = $('.game-box');
-  if (gbox) {
-    const scr = $('.game-screen', gbox), scoreEl = $('[data-score]', gbox), bestEl = $('[data-best]', gbox);
-    const ROWS = 12, GROUND = 11;
+  /* =====================================================================
+     GAMES
+     Five small games on the About page. Two are drawn on a <canvas>
+     (HTTP Dino, Catch the skills) and three are plain buttons
+     (Ship it, Squash the bugs, Memory).
+     ===================================================================== */
+  const pad2 = (n) => String(Math.max(0, n)).padStart(2, '0');
+  const pad4 = (n) => String(Math.max(0, n)).padStart(4, '0');
+  const oneOf = (a) => a[(Math.random() * a.length) | 0];
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const buzz = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* no haptics */ } };
+
+  /* A screen made of letters, painted on a canvas.
+     You place text by column and row (decimals allowed, which is what makes movement smooth). */
+  const asciiScreen = (canvas, rows) => {
+    const ctx = canvas.getContext('2d');
+    const s = { cols: 40, rows, cw: 8, ch: 16, color: {} };
+    let font = '';
+    s.colors = () => {
+      const cs = getComputedStyle(canvas);
+      const v = (name) => cs.getPropertyValue(name).trim();
+      s.color = { '': v('--ink'), dim: v('--ink-3'), hot: v('--signal'), warm: v('--signal-ink') };
+    };
+    s.fit = () => {
+      const w = canvas.clientWidth || 300;
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      const fs = w < 380 ? 12 : w < 640 ? 13 : 15;
+      font = `${fs}px "Plex Mono", ui-monospace, Menlo, monospace`;
+      ctx.font = font;
+      s.cw = ctx.measureText('M').width;
+      s.ch = Math.round(fs * 1.3);
+      s.cols = Math.max(24, Math.floor(w / s.cw));
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(rows * s.ch * dpr);
+      canvas.style.height = rows * s.ch + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.font = font;
+      ctx.textBaseline = 'top';
+      s.colors();
+    };
+    s.clear = () => { ctx.globalAlpha = 1; ctx.clearRect(0, 0, canvas.width, canvas.height); };
+    s.shake = (px) => { ctx.translate((Math.random() - 0.5) * px, (Math.random() - 0.5) * px); };
+    s.unshake = () => { const dpr = canvas.width / (canvas.clientWidth || 1); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+    s.put = (col, row, str, kind, alpha) => {
+      ctx.fillStyle = s.color[kind || ''] || s.color[''];
+      ctx.globalAlpha = alpha == null ? 1 : Math.max(0, Math.min(1, alpha));
+      for (let i = 0; i < str.length; i++) if (str[i] !== ' ') ctx.fillText(str[i], (col + i) * s.cw, row * s.ch);
+    };
+    s.center = (row, str, kind, alpha) => s.put(Math.max(0, (s.cols - str.length) / 2), row, str, kind, alpha);
+    s.colAt = (clientX) => { const r = canvas.getBoundingClientRect(); return ((clientX - r.left) / r.width) * s.cols; };
+    s.fit();
+    return s;
+  };
+  /* run fn every frame, but only while the game is on screen and the tab is visible */
+  const gameLoop = (box, step) => {
+    let raf = 0, last = 0, visible = false, running = false;
+    const frame = (now) => {
+      raf = 0;
+      if (!running || !visible || document.hidden) return;
+      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
+      step(dt, now);
+      if (running) raf = requestAnimationFrame(frame);
+    };
+    const kick = () => { if (!raf && running && visible) { last = performance.now(); raf = requestAnimationFrame(frame); } };
+    new IntersectionObserver((en) => { visible = en[0].isIntersecting; kick(); }, { threshold: 0.2 }).observe(box);
+    document.addEventListener('visibilitychange', kick);
+    return { start: () => { running = true; kick(); }, stop: () => { running = false; } };
+  };
+  const onTheme = (fn) => new MutationObserver(fn).observe(doc, { attributes: true, attributeFilter: ['data-theme'] });
+  /* a little burst of letters when you win */
+  const celebrate = (box) => {
+    if (reduce) return;
+    const bits = ['*', '+', '·', '{ }', '</>', 'c[_]', ':)', '++', 'ok'];
+    for (let i = 0; i < 16; i++) {
+      const el = document.createElement('span');
+      el.className = 'confetti';
+      el.textContent = oneOf(bits);
+      el.style.left = 6 + Math.random() * 88 + '%';
+      box.appendChild(el);
+      const rise = 60 + Math.random() * 120, drift = (Math.random() - 0.5) * 60;
+      el.animate(
+        [{ transform: 'translate(0, 0) rotate(0)', opacity: 0 }, { opacity: 1, offset: 0.15 }, { transform: `translate(${drift}px, -${rise}px) rotate(${(Math.random() - 0.5) * 40}deg)`, opacity: 0 }],
+        { duration: 900 + Math.random() * 700, delay: Math.random() * 250, easing: 'cubic-bezier(.2,.7,.1,1)' }
+      ).onfinish = () => el.remove();
+    }
+    buzz([12, 40, 12]);
+  };
+  /* the end-of-game card used by the three button games */
+  const winCard = (box, title, line, again) => {
+    const old = $('.game-win', box); if (old) old.remove();
+    const el = document.createElement('div');
+    el.className = 'game-win';
+    el.innerHTML = '<p class="gw-t serif"></p><p class="gw-l"></p><button type="button" class="btn btn-sm">Play again</button>';
+    $('.gw-t', el).textContent = title;
+    $('.gw-l', el).textContent = line;
+    $('button', el).addEventListener('click', () => { el.remove(); again(); });
+    box.appendChild(el);
+    celebrate(box);
+  };
+
+  /* ---------- 1 · HTTP Dino: jump the bugs, grab the coffee ---------- */
+  const dinoBox = $('[data-game="dino"]');
+  if (dinoBox) {
+    const canvas = $('canvas', dinoBox), scoreEl = $('[data-score]', dinoBox), bestEl = $('[data-best]', dinoBox);
+    const ROWS = 14, GROUND = 12;            // the ground line sits on row 12
+    const GRAVITY = 62, JUMP = 27;           // rows per second: higher JUMP = higher jump
     const DINO = [
       ['           __ ', '          / _)', '   .-^^^-/ /  ', '__/       /   ', '<__.|_|-|_|   '],
       ['           __ ', '          / _)', '   .-^^^-/ /  ', '__/       /   ', '<__./_/-\\_\\   '],
     ];
     const BUGS = [
-      { art: ['\\_/', '(o)'], w: 3, h: 2 },
-      { art: ['\\|/', '(o)', '/|\\'], w: 3, h: 3 },
       { art: ['404'], w: 3, h: 1 },
+      { art: ['\\_/', '(o)'], w: 3, h: 2 },
       { art: ['}{', '}{'], w: 2, h: 2 },
+      { art: ['\\|/', '(o)', '/|\\'], w: 3, h: 3, late: true },
     ];
-    const COFFEE = { art: ['c[_]'], w: 4, h: 1 };
+    const RANKS = [[0, 'intern'], [60, 'junior dev'], [150, 'developer'], [300, 'senior dev'], [500, 'tech lead'], [800, 'staff engineer'], [1200, 'CTO']];
     const QUIPS = ['Even I ship bugs sometimes.', 'That one is in production now.', 'Classic Friday deploy.', 'Needs more coffee.', 'The bug says hi.'];
-    let bonus = 0, cols = 60, state = 'ready', y = 0, vy = 0, x = 2, speed = 20, dist = 0, score = 0, best = 0, items = [], clouds = [], gap = 30, frame = 0, flash = '', flashT = 0, quip = '', raf = 0, last = 0, onScreen = false;
-    try { best = parseInt(localStorage.getItem('ksp-dino-best') || '0', 10) || 0; } catch (e) { best = 0; }
-    const pad4 = (n) => String(n).padStart(4, '0');
+    const scr = asciiScreen(canvas, ROWS);
+    const X = 1;                             // dino's left edge, in columns
+    let state = 'ready', y = 0, vy = 0, air = 0, wantJump = -1, speed = 17, dist = 0, bonus = 0, score = 0, gap = 0;
+    let items = [], dust = [], clouds = [], flash = '', flashT = 0, quip = '', overAt = 0, shakeT = 0, rankI = 0, t = 0;
+    let best = parseInt(store.get('ksp-dino-best') || '0', 10) || 0;
     bestEl.textContent = pad4(best);
-    const fit = () => {
-      const fs = innerWidth < 600 ? 12 : 13;
-      scr.style.fontSize = fs + 'px';
-      cols = Math.max(34, Math.min(80, Math.floor(gbox.clientWidth / (fs * 0.6)) - 2));
-    };
-    fit();
-    addEventListener('resize', fit);
+    const rankOf = (sc) => { let r = 0; RANKS.forEach((k, i) => { if (sc >= k[0]) r = i; }); return r; };
+    const puff = (n, col, row) => { for (let i = 0; i < n; i++) dust.push({ x: col + Math.random() * 6, y: row, vx: -4 - Math.random() * 6, vy: -1 - Math.random() * 3, life: 0.45, ch: oneOf(['.', '·', "'"]) }); };
     const reset = () => {
-      y = 0; vy = 0; speed = 20; dist = 0; score = 0; bonus = 0; items = []; gap = cols * 0.7; flash = ''; flashT = 0;
-      clouds = [{ x: cols * 0.3, row: 1 }, { x: cols * 0.8, row: 0 }];
+      y = 0; vy = 0; air = 0; wantJump = -1; speed = 17; dist = 0; bonus = 0; score = 0; rankI = 0;
+      items = []; dust = []; flash = ''; flashT = 0; shakeT = 0; gap = scr.cols * 0.9;
+      clouds = [{ x: scr.cols * 0.2, row: 1 }, { x: scr.cols * 0.7, row: 0 }];
       scoreEl.textContent = pad4(0);
     };
-    reset();
-    const G = 95, V0 = 31;
-    const jump = () => {
-      if (state === 'ready' || state === 'over') { reset(); state = 'run'; last = performance.now(); loop(last); return; }
-      if (y <= 0.01) vy = V0;
-    };
     const spawn = () => {
-      if (Math.random() < 0.22) items.push({ ...COFFEE, x: cols + 2, lift: 4 + ((Math.random() * 2) | 0), coffee: true });
-      else { const b = BUGS[(Math.random() * BUGS.length) | 0]; items.push({ ...b, x: cols + 2, lift: 0 }); }
-      gap = Math.max(16, speed * (0.85 + Math.random() * 0.9));
+      if (Math.random() < 0.24) items.push({ art: ['c[_]'], w: 4, h: 1, x: scr.cols + 1, lift: 4 + ((Math.random() * 2) | 0), coffee: true });
+      else {
+        const pool = BUGS.filter((b) => !b.late || score > 150);
+        items.push({ ...oneOf(pool), x: scr.cols + 1, lift: 0 });
+      }
+      // always leave room to land and breathe before the next one
+      gap = Math.max(22, speed * (1.15 + Math.random() * 0.9));
     };
     const draw = () => {
-      const ch = Array.from({ length: ROWS }, () => new Array(cols).fill(' '));
-      const cl = Array.from({ length: ROWS }, () => new Array(cols).fill(''));
-      const put = (r, c, str, cls) => { for (let k = 0; k < str.length; k++) { const cc = c + k; if (r >= 0 && r < ROWS && cc >= 0 && cc < cols && str[k] !== ' ') { ch[r][cc] = str[k]; cl[r][cc] = cls || ''; } } };
-      clouds.forEach((c) => put(c.row, Math.round(c.x), '.-~~~-.', 'm'));
-      const off = Math.floor(dist) % 7;
-      for (let c = 0; c < cols; c++) { ch[GROUND][c] = (c + off) % 7 === 0 ? '.' : '_'; cl[GROUND][c] = 'm'; }
-      items.forEach((it) => it.art.forEach((line, i) => put(GROUND - it.h - it.lift + i, Math.round(it.x), line, it.coffee ? 'c' : 'b')));
-      const legs = state === 'run' && y <= 0.01 ? (Math.floor(dist / 2) % 2) : 0;
-      const top = GROUND - 5 - Math.round(y);
-      DINO[legs].forEach((line, i) => put(top + i, x, line, 'd'));
-      const center = (r, str, cls) => put(r, Math.max(0, Math.floor((cols - str.length) / 2)), str, cls);
-      if (state === 'ready') { center(2, 'HTTP DINO', 'b'); center(3, 'tap or press space to jump'); center(4, '(my hackathon team was called this)', 'm'); }
-      if (state === 'over') { center(2, `BUG GOT YOU · score ${score}`, 'b'); center(3, quip); center(4, 'tap to try again', 'm'); }
-      if (flashT > 0) center(1, flash, 'c');
-      let html = '';
-      for (let r = 0; r < ROWS; r++) {
-        let cur = '', run = '';
-        const flush = () => { if (!run) return; html += cur ? `<span class="g-${cur}">${run}</span>` : run; run = ''; };
-        for (let c = 0; c < cols; c++) {
-          const k = cl[r][c]; let t = ch[r][c];
-          t = t === '<' ? '&lt;' : t === '>' ? '&gt;' : t === '&' ? '&amp;' : t;
-          if (k !== cur) { flush(); cur = k; }
-          run += t;
-        }
-        flush();
-        if (r < ROWS - 1) html += '\n';
-      }
-      scr.innerHTML = html;
+      scr.clear();
+      if (shakeT > 0) scr.shake(6 * shakeT / 0.3);
+      clouds.forEach((c) => scr.put(c.x, c.row, '.-~~~-.', 'dim', 0.7));
+      const off = dist % 7;
+      for (let c = -1; c < scr.cols + 7; c += 7) scr.put(c - off, GROUND, '.______', 'dim');
+      items.forEach((it) => it.art.forEach((line, i) => scr.put(it.x, GROUND - it.h - it.lift + i, line, it.coffee ? 'warm' : 'hot')));
+      dust.forEach((d) => scr.put(d.x, d.y, d.ch, 'dim', d.life / 0.45));
+      const legs = state === 'run' && y < 0.05 ? Math.floor(dist / 2.2) % 2 : 0;
+      DINO[legs].forEach((line, i) => scr.put(X, GROUND - 5 - y + i, line, ''));
+      const blink = 0.55 + 0.45 * Math.sin(t * 4);
+      if (state === 'ready') {
+        scr.center(3, 'HTTP DINO', 'hot');
+        scr.center(5, fine ? '[ click or press space ]' : '[ tap to play ]', '', blink);
+        scr.center(6, 'tap twice for a double jump', 'dim');
+      } else if (state === 'over') {
+        scr.center(3, `score ${score} · ${RANKS[rankOf(score)][1]}`, 'hot');
+        scr.center(4, quip);
+        if (performance.now() - overAt > 500) scr.center(6, fine ? '[ click to try again ]' : '[ tap to try again ]', '', blink);
+      } else if (flashT > 0) scr.center(3, flash, 'warm', flashT / 0.5);
+      scr.unshake();
     };
-    const hit = (it) => {
-      const top = GROUND - 5 - y; // dino top row (float)
-      const dx0 = x + 4, dx1 = x + 12, dy0 = top + 1.6, dy1 = top + 4.6;
-      const ix0 = it.x, ix1 = it.x + it.w - 0.2, iy0 = GROUND - it.h - it.lift, iy1 = GROUND - it.lift - 0.2;
-      return dx0 < ix1 && dx1 > ix0 && dy0 < iy1 && dy1 > iy0;
-    };
-    const loop = (now) => {
-      cancelAnimationFrame(raf);
-      if (state !== 'run' || !onScreen) { draw(); return; }
-      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
-      speed = Math.min(42, speed + dt * 0.6);
-      const dx = speed * dt;
-      dist += dx; gap -= dx;
-      if (gap <= 0) spawn();
-      vy -= G * dt; y = Math.max(0, y + vy * dt); if (y === 0 && vy < 0) vy = 0;
-      clouds.forEach((c) => { c.x -= dx * 0.25; if (c.x < -8) { c.x = cols + Math.random() * 10; c.row = (Math.random() * 2) | 0; } });
-      for (let i = items.length - 1; i >= 0; i--) {
-        const it = items[i];
-        it.x -= dx;
-        if (it.x < -6) { items.splice(i, 1); continue; }
-        if (hit(it)) {
-          if (it.coffee) { items.splice(i, 1); bonus += 10; flash = '+10 · caffeinated'; flashT = 0.9; continue; }
-          state = 'over'; quip = QUIPS[(Math.random() * QUIPS.length) | 0];
-          if (score > best) { best = score; bestEl.textContent = pad4(best); try { localStorage.setItem('ksp-dino-best', String(best)); } catch (e) { /* ignore */ } }
-          draw(); return;
+    const loop = gameLoop(dinoBox, (dt, now) => {
+      t += dt;
+      if (state === 'run') {
+        speed = Math.min(34, speed + dt * 0.45);
+        const dx = speed * dt;
+        dist += dx; gap -= dx;
+        if (gap <= 0) spawn();
+        // jump: a tap a moment before landing still counts, and one extra jump is allowed in the air
+        if (wantJump > 0 && now - wantJump < 160) {
+          if (y < 0.05) { vy = JUMP; air = 0; wantJump = -1; puff(3, X + 2, GROUND - 1); }
+          else if (air < 1) { vy = JUMP * 0.85; air++; wantJump = -1; puff(2, X + 4, GROUND - 1 - y); }
+        }
+        const wasUp = y > 0.05;
+        vy -= GRAVITY * dt; y += vy * dt;
+        if (y <= 0) { y = 0; vy = 0; if (wasUp) puff(3, X + 2, GROUND - 1); }
+        if (y > 6.6) { y = 6.6; vy = Math.min(vy, 0); }   // a ceiling, so a double jump never leaves the screen
+        clouds.forEach((c) => { c.x -= dx * 0.2; if (c.x < -8) { c.x = scr.cols + Math.random() * 10; c.row = (Math.random() * 2) | 0; } });
+        const feet = GROUND - y, bx0 = X + 5, bx1 = X + 11, by0 = feet - 3.3;
+        for (let i = items.length - 1; i >= 0; i--) {
+          const it = items[i];
+          it.x -= dx;
+          if (it.x < -6) { items.splice(i, 1); continue; }
+          const top = GROUND - it.h - it.lift, bottom = GROUND - it.lift;
+          const touch = bx0 < it.x + it.w - 0.4 && bx1 > it.x + 0.4 && by0 < bottom - 0.3 && feet > top + 0.35;
+          if (!touch) continue;
+          if (it.coffee) { items.splice(i, 1); bonus += 10; flash = '+10 · caffeinated'; flashT = 0.9; buzz(8); continue; }
+          state = 'over'; overAt = now; shakeT = 0.3; quip = oneOf(QUIPS); buzz(60);
+          dinoBox.classList.remove('is-playing');
+          if (score > best) { best = score; quip = 'New best. ' + quip; bestEl.textContent = pad4(best); store.set('ksp-dino-best', String(best)); }
+          break;
+        }
+        if (state === 'run') {
+          score = Math.floor(dist / 4) + bonus;
+          scoreEl.textContent = pad4(score);
+          const r = rankOf(score);
+          if (r > rankI) { rankI = r; flash = 'promoted: ' + RANKS[r][1]; flashT = 1.4; }
         }
       }
-      score = Math.floor(dist / 4) + bonus;
-      scoreEl.textContent = pad4(score);
+      for (let i = dust.length - 1; i >= 0; i--) { const d = dust[i]; d.life -= dt; d.x += d.vx * dt; d.y += d.vy * dt; if (d.life <= 0) dust.splice(i, 1); }
       if (flashT > 0) flashT -= dt;
+      if (shakeT > 0) shakeT -= dt;
       draw();
-      raf = requestAnimationFrame(loop);
+    });
+    const press = () => {
+      const now = performance.now();
+      if (state === 'run') { wantJump = now; return; }
+      if (state === 'over' && now - overAt < 500) return;   // so a late tap does not restart by accident
+      reset(); state = 'run'; wantJump = now;
+      dinoBox.classList.add('is-playing');
     };
-    gbox.addEventListener('pointerdown', (e) => { e.preventDefault(); gbox.focus({ preventScroll: true }); jump(); });
-    gbox.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'Enter') { e.preventDefault(); jump(); } });
-    new IntersectionObserver((en) => {
-      onScreen = en[0].isIntersecting;
-      if (onScreen && state === 'run') { last = performance.now(); raf = requestAnimationFrame(loop); }
-    }, { threshold: 0.3 }).observe(gbox);
-    draw();
+    dinoBox.addEventListener('pointerdown', (e) => { if (e.button) return; e.preventDefault(); if (e.pointerType === 'mouse') dinoBox.focus({ preventScroll: true }); press(); });
+    dinoBox.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) press(); } });
+    const refit = () => { scr.fit(); draw(); };
+    addEventListener('resize', refit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refit);
+    onTheme(() => { scr.colors(); draw(); });
+    reset(); draw();
+    loop.start();   // the loop keeps running so the "tap to play" line can pulse
   }
 
-  /* =====================================================================
-     Mini games at the end of each About section
-     ===================================================================== */
-  const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
-  const pad2 = (n) => String(Math.max(0, n)).padStart(2, '0');
-  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
-  const escHtml = (t) => (t === '<' ? '&lt;' : t === '>' ? '&gt;' : t === '&' ? '&amp;' : t);
-  const gridHtml = (ch, cl) => ch.map((row, r) => {
-    let html = '', cur = '', run = '';
-    const flush = () => { if (run) html += cur ? `<span class="g-${cur}">${run}</span>` : run; run = ''; };
-    row.forEach((c, i) => { const k = cl[r][i]; if (k !== cur) { flush(); cur = k; } run += escHtml(c); });
-    flush();
-    return html;
-  }).join('\n');
-
-  /* ---- 1 · catch the skills ---- */
-  const gCatch = $('[data-game="catch"]');
-  if (gCatch) {
-    const box = $('.game-box', gCatch), scr = $('.game-screen', gCatch), scoreEl = $('[data-score]', gCatch), timeEl = $('[data-time]', gCatch);
-    const ROWS = 11, BASKET = '\\_______/', BW = BASKET.length, ROUND = 20;
+  /* ---------- 2 · Catch the skills ---------- */
+  const catchBox = $('[data-game="catch"] .game-box');
+  if (catchBox) {
+    const canvas = $('canvas', catchBox), scoreEl = $('[data-score]', catchBox), timeEl = $('[data-time]', catchBox);
+    const ROWS = 12, BASKET = '\\_______/', BW = BASKET.length, ROUND = 20;
     const SKILLS = ['react', 'kotlin', 'python', 'git', 'sql', 'docker', 'esp32', 'next.js', 'java', 'node', 'c#', 'angular'];
-    let cols = 50, bx = 20, target = null, items = [], state = 'ready', score = 0, left = ROUND, spawnIn = 0, raf = 0, last = 0, onScreen = false, flash = '', flashT = 0, keys = 0;
-    const fit = () => { const fs = innerWidth < 600 ? 12 : 13; scr.style.fontSize = fs + 'px'; cols = Math.max(30, Math.min(80, Math.floor(box.clientWidth / (fs * 0.6)) - 2)); bx = Math.min(bx, cols - BW); };
-    fit(); addEventListener('resize', fit);
+    const scr = asciiScreen(canvas, ROWS);
+    let state = 'ready', bx = 0, target = null, keys = 0, items = [], pops = [], score = 0, combo = 0, left = ROUND, spawnIn = 0, t = 0, overAt = 0;
+    const centerBasket = () => { bx = (scr.cols - BW) / 2; target = null; };
     const draw = () => {
-      const ch = Array.from({ length: ROWS }, () => new Array(cols).fill(' '));
-      const cl = Array.from({ length: ROWS }, () => new Array(cols).fill(''));
-      const put = (r, c, str, k) => { for (let i = 0; i < str.length; i++) { const cc = c + i; if (r >= 0 && r < ROWS && cc >= 0 && cc < cols && str[i] !== ' ') { ch[r][cc] = str[i]; cl[r][cc] = k || ''; } } };
-      const center = (r, str, k) => put(r, Math.max(0, Math.floor((cols - str.length) / 2)), str, k);
-      items.forEach((it) => put(Math.floor(it.y), Math.round(it.x), it.t, it.k));
-      put(ROWS - 1, Math.round(bx), BASKET, 'd');
-      if (state === 'ready') { center(2, 'CATCH THE SKILLS', 'b'); center(3, 'drag, tap or use arrow keys to move'); center(4, 'skills +1 · coffee +3 · bugs }{ -2', 'm'); center(6, 'tap to start', 'm'); }
-      if (state === 'over') {
-        center(2, `you caught ${score} skill${score === 1 ? '' : 's'}`, 'b');
-        center(3, score >= 15 ? 'fast learner, confirmed.' : score >= 8 ? 'that is roughly my week.' : 'the bugs had a good day.');
-        center(5, 'tap to play again', 'm');
-      }
-      if (flashT > 0) center(0, flash, 'c');
-      scr.innerHTML = gridHtml(ch, cl);
+      scr.clear();
+      items.forEach((it) => scr.put(it.x, it.y, it.t, it.kind));
+      pops.forEach((p) => scr.put(p.x, p.y, p.t, p.kind, p.life / 0.7));
+      scr.put(bx, ROWS - 1, BASKET, '');
+      const blink = 0.55 + 0.45 * Math.sin(t * 4);
+      if (state === 'ready') {
+        scr.center(1, 'CATCH THE SKILLS', 'hot');
+        scr.center(3, fine ? '[ click to start ]' : '[ tap to start ]', '', blink);
+        scr.center(5, 'slide your finger to move', 'dim');
+        scr.center(6, 'skills +1 · coffee +3 · bugs -2', 'dim');
+      } else if (state === 'over') {
+        const stars = score >= 18 ? 3 : score >= 10 ? 2 : score >= 4 ? 1 : 0;
+        scr.center(1, `you caught ${score}`, 'hot');
+        scr.center(2, '[' + '*'.repeat(stars) + ' '.repeat(3 - stars) + ']', 'warm');
+        scr.center(4, stars === 3 ? 'fast learner, confirmed.' : stars === 2 ? 'that is roughly my week.' : 'the bugs had a good day.');
+        if (performance.now() - overAt > 600) scr.center(6, fine ? '[ click to play again ]' : '[ tap to play again ]', '', blink);
+      } else if (combo >= 3) scr.put(scr.cols - 9, 0, `combo x${combo}`, 'warm');
     };
-    const start = () => { items = []; score = 0; left = ROUND; spawnIn = 0; state = 'run'; scoreEl.textContent = pad2(0); timeEl.textContent = String(ROUND); last = performance.now(); raf = requestAnimationFrame(loop); };
-    const loop = (now) => {
-      cancelAnimationFrame(raf);
-      if (state !== 'run' || !onScreen) { draw(); return; }
-      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000)); last = now;
-      left -= dt;
-      if (left <= 0) { left = 0; state = 'over'; timeEl.textContent = '0'; draw(); return; }
-      timeEl.textContent = String(Math.ceil(left));
-      if (keys) bx += keys * 34 * dt;
-      if (target !== null) bx += Math.sign(target - bx) * Math.min(Math.abs(target - bx), 70 * dt);
-      bx = Math.max(0, Math.min(cols - BW, bx));
-      spawnIn -= dt;
-      if (spawnIn <= 0) {
-        const r = Math.random();
-        const t = r < 0.68 ? SKILLS[(Math.random() * SKILLS.length) | 0] : r < 0.92 ? '}{' : 'c[_]';
-        const k = r < 0.68 ? '' : r < 0.92 ? 'b' : 'c';
-        items.push({ t, k, x: Math.random() * (cols - t.length), y: 0, v: 3.2 + Math.random() * 2 + (ROUND - left) * 0.12 });
-        spawnIn = 0.45 + Math.random() * 0.45;
-      }
-      for (let i = items.length - 1; i >= 0; i--) {
-        const it = items[i];
-        it.y += it.v * dt;
-        if (Math.floor(it.y) >= ROWS - 1) {
-          const overlap = it.x + it.t.length > bx + 0.5 && it.x < bx + BW - 0.5;
-          if (overlap) {
-            if (it.k === 'b') { score -= 2; flash = 'ouch, a bug · -2'; }
-            else if (it.k === 'c') { score += 3; flash = 'coffee · +3'; }
-            else { score += 1; flash = `+1 ${it.t}`; }
-            score = Math.max(0, score); flashT = 0.7;
-            scoreEl.textContent = pad2(score);
-          }
-          items.splice(i, 1);
+    const loop = gameLoop(catchBox, (dt, now) => {
+      t += dt;
+      if (state === 'run') {
+        left -= dt;
+        timeEl.textContent = String(Math.max(0, Math.ceil(left)));
+        if (keys) { target = null; bx += keys * 36 * dt; }
+        if (target !== null) bx += (target - bx) * Math.min(1, dt * 22);   // glide toward the finger
+        bx = Math.max(0, Math.min(scr.cols - BW, bx));
+        spawnIn -= dt;
+        if (spawnIn <= 0) {
+          const r = Math.random();
+          const text = r < 0.68 ? oneOf(SKILLS) : r < 0.9 ? '}{' : 'c[_]';
+          items.push({ t: text, kind: r < 0.68 ? '' : r < 0.9 ? 'hot' : 'warm', x: Math.random() * (scr.cols - text.length), y: -1, v: 3.4 + Math.random() * 2 + (ROUND - left) * 0.14 });
+          spawnIn = 0.42 + Math.random() * 0.4;
         }
+        for (let i = items.length - 1; i >= 0; i--) {
+          const it = items[i];
+          it.y += it.v * dt;
+          if (it.y < ROWS - 1.4) continue;
+          if (it.x + it.t.length > bx + 0.3 && it.x < bx + BW - 0.3) {
+            let gain = 1, label = '+1';
+            if (it.kind === 'hot') { gain = -2; label = '-2 bug'; combo = 0; buzz(40); }
+            else if (it.kind === 'warm') { gain = 3; label = '+3 coffee'; combo++; buzz(8); }
+            else { combo++; buzz(6); }
+            score = Math.max(0, score + gain);
+            scoreEl.textContent = pad2(score);
+            pops.push({ t: label, kind: gain < 0 ? 'hot' : 'warm', x: Math.min(scr.cols - label.length, Math.max(0, it.x)), y: ROWS - 2.4, life: 0.7 });
+            items.splice(i, 1);
+          } else if (it.y > ROWS) { if (it.kind === '') combo = 0; items.splice(i, 1); }
+        }
+        if (left <= 0) { state = 'over'; overAt = now; items = []; catchBox.classList.remove('is-playing'); if (score >= 10) celebrate(catchBox); }
       }
-      if (flashT > 0) flashT -= dt;
+      for (let i = pops.length - 1; i >= 0; i--) { const p = pops[i]; p.life -= dt; p.y -= 3 * dt; if (p.life <= 0) pops.splice(i, 1); }
       draw();
-      raf = requestAnimationFrame(loop);
-    };
-    const toCol = (e) => { const r = scr.getBoundingClientRect(); return ((e.clientX - r.left) / r.width) * cols - BW / 2; };
-    scr.style.touchAction = 'pan-y';
-    box.addEventListener('pointerdown', (e) => {
-      box.focus({ preventScroll: true });
-      if (state !== 'run') { start(); return; }
-      target = toCol(e);
     });
-    box.addEventListener('pointermove', (e) => { if (state === 'run' && (e.pointerType === 'mouse' || e.buttons)) target = toCol(e); });
-    box.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); target = null; keys = e.key === 'ArrowLeft' ? -1 : 1; if (state !== 'run') start(); }
+    const start = () => { items = []; pops = []; score = 0; combo = 0; left = ROUND; spawnIn = 0.2; state = 'run'; scoreEl.textContent = '00'; catchBox.classList.add('is-playing'); };
+    const follow = (e) => { target = scr.colAt(e.clientX) - BW / 2; };
+    catchBox.addEventListener('pointerdown', (e) => {
+      if (e.button) return;
+      if (e.pointerType === 'mouse') catchBox.focus({ preventScroll: true });
+      if (state === 'run') { follow(e); return; }
+      if (state === 'over' && performance.now() - overAt < 600) return;
+      e.preventDefault(); start(); follow(e);
+    });
+    catchBox.addEventListener('pointermove', (e) => { if (state === 'run') follow(e); });
+    catchBox.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); keys = e.key === 'ArrowLeft' ? -1 : 1; if (state !== 'run') start(); }
       if ((e.key === ' ' || e.key === 'Enter') && state !== 'run') { e.preventDefault(); start(); }
     });
-    box.addEventListener('keyup', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys = 0; });
-    new IntersectionObserver((en) => { onScreen = en[0].isIntersecting; if (onScreen && state === 'run') { last = performance.now(); raf = requestAnimationFrame(loop); } }, { threshold: 0.3 }).observe(box);
-    bx = (cols - BW) / 2;
-    draw();
+    catchBox.addEventListener('keyup', (e) => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') keys = 0; });
+    const refit = () => { scr.fit(); bx = Math.min(bx, scr.cols - BW); draw(); };
+    addEventListener('resize', refit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { scr.fit(); if (state !== 'run') centerBasket(); draw(); });
+    onTheme(() => { scr.colors(); draw(); });
+    centerBasket(); draw();
+    loop.start();
   }
 
-  /* ---- 2 · ship it: tap the steps in order ---- */
+  /* ---------- 3 · Ship it: tap the five steps in order ---------- */
   const gShip = $('[data-game="ship"]');
   if (gShip) {
     const STEPS = ['Spec', 'Slice', 'Generate', 'Verify', 'Ship'];
-    const line = $('[data-line]', gShip), btns = $('[data-btns]', gShip), msg = $('[data-msg]', gShip);
+    const box = $('.game-box', gShip), line = $('[data-line]', gShip), btns = $('[data-btns]', gShip), msg = $('[data-msg]', gShip);
     const timeEl = $('[data-time]', gShip), bestEl = $('[data-best]', gShip);
-    let next = 0, t0 = 0, timer = 0, penalty = 0, running = false, best = parseFloat(lsGet('ksp-ship-best') || '0') || 0;
+    let next = 0, t0 = 0, timer = 0, penalty = 0, running = false, best = parseFloat(store.get('ksp-ship-best') || '0') || 0;
     if (best) bestEl.textContent = best.toFixed(1) + 's';
-    const drawLine = () => { line.textContent = STEPS.map((st, i) => (i < next ? `[${st.toUpperCase()}]` : '[ ? ]')).join(' -> '); };
+    const drawLine = () => {
+      line.innerHTML = '';
+      STEPS.forEach((st, i) => {
+        const el = document.createElement('span');
+        el.className = 'pipe' + (i < next ? ' on' : '');
+        el.textContent = i < next ? st : '?';
+        line.appendChild(el);
+      });
+    };
     const elapsed = () => (performance.now() - t0) / 1000 + penalty;
     const setup = () => {
       next = 0; penalty = 0; running = false; clearInterval(timer);
@@ -818,7 +863,7 @@
       btns.innerHTML = '';
       shuffle(STEPS.slice()).forEach((st) => {
         const b = document.createElement('button');
-        b.type = 'button'; b.className = 'ship-btn mono'; b.textContent = `[ ${st} ]`; b.dataset.step = st;
+        b.type = 'button'; b.className = 'ship-btn'; b.textContent = st; b.dataset.step = st;
         b.addEventListener('click', () => press(b));
         btns.appendChild(b);
       });
@@ -828,19 +873,18 @@
       if (b.disabled) return;
       if (!running && next === 0) { running = true; t0 = performance.now(); timer = setInterval(() => { timeEl.textContent = elapsed().toFixed(1) + 's'; }, 100); }
       if (b.dataset.step === STEPS[next]) {
-        b.disabled = true; b.classList.add('done'); next++; drawLine();
-        msg.textContent = next < STEPS.length ? ['Good. Next?', 'Nice.', 'Keep going.', 'Almost there.'][next - 1] : '';
+        b.disabled = true; b.classList.add('done'); next++; drawLine(); buzz(8);
+        msg.textContent = ['Good. Next?', 'Nice.', 'Keep going.', 'Almost there.', ''][next - 1];
         if (next === STEPS.length) {
           clearInterval(timer); running = false;
           const t = elapsed();
           timeEl.textContent = t.toFixed(1) + 's';
           const rec = !best || t < best;
-          if (rec) { best = t; lsSet('ksp-ship-best', String(t)); bestEl.textContent = t.toFixed(1) + 's'; }
-          msg.innerHTML = `Shipped in ${t.toFixed(1)}s. Production is safe.${rec ? ' New best!' : ''} <button type="button" class="link ship-again">Play again</button>`;
-          $('.ship-again', msg).addEventListener('click', setup);
+          if (rec) { best = t; store.set('ksp-ship-best', String(t)); bestEl.textContent = t.toFixed(1) + 's'; }
+          winCard(box, `Shipped in ${t.toFixed(1)}s`, (t < 3 ? 'Faster than my CI pipeline.' : t < 6 ? 'Production is safe.' : 'Shipped is better than perfect.') + (rec ? ' New best!' : ''), setup);
         }
       } else {
-        penalty += 1;
+        penalty += 1; buzz(40);
         msg.textContent = `Not yet. "${b.dataset.step}" comes later. +1s`;
         b.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 260 });
       }
@@ -848,10 +892,10 @@
     setup();
   }
 
-  /* ---- 3 · squash the bugs, spare the features ---- */
+  /* ---------- 4 · Squash the bugs, spare the features ---------- */
   const gSq = $('[data-game="squash"]');
   if (gSq) {
-    const holesEl = $('[data-holes]', gSq), msg = $('[data-msg]', gSq), scoreEl = $('[data-score]', gSq), timeEl = $('[data-time]', gSq);
+    const box = $('.game-box', gSq), holesEl = $('[data-holes]', gSq), msg = $('[data-msg]', gSq), scoreEl = $('[data-score]', gSq), timeEl = $('[data-time]', gSq);
     const ART = {
       empty: ['     ', '     ', '\\___/'],
       bug: [' \\_/ ', '-(o)-', '\\___/'],
@@ -859,9 +903,16 @@
       splat: [' \\*/ ', ' x_x ', '\\___/'],
       oops: ['  !  ', 'oops ', '\\___/'],
     };
-    const N = 8, ROUND = 20;
+    const N = 6, ROUND = 20;
     const holes = [];
-    let state = 'ready', score = 0, left = ROUND, tick = 0, clock = 0;
+    let state = 'ready', score = 0, left = ROUND, tick = 0, clock = 0, spawnAt = 0;
+    const show = (h, kind, ms) => { h.kind = kind; h.until = performance.now() + ms; h.pre.textContent = ART[kind].join('\n'); h.b.dataset.kind = kind; };
+    const hit = (h) => {
+      if (state !== 'run') { if ($('.game-win', box)) return; start(); return; }
+      if (h.kind === 'bug') { score++; show(h, 'splat', 350); buzz(10); h.b.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.9)' }, { transform: 'scale(1)' }], { duration: 160 }); }
+      else if (h.kind === 'feature') { score = Math.max(0, score - 3); show(h, 'oops', 500); msg.textContent = 'That was a feature! -3'; buzz(50); }
+      scoreEl.textContent = pad2(score);
+    };
     for (let i = 0; i < N; i++) {
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'hole';
@@ -869,25 +920,19 @@
       const pre = document.createElement('pre'); pre.className = 'sprite'; pre.textContent = ART.empty.join('\n');
       b.appendChild(pre); holesEl.appendChild(b);
       const h = { b, pre, kind: 'empty', until: 0 };
-      b.addEventListener('click', () => hit(h));
+      b.addEventListener('pointerdown', (e) => { if (e.button) return; e.preventDefault(); hit(h); });   // pointerdown reacts faster than click on phones
+      b.addEventListener('keydown', (e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); hit(h); } });
       holes.push(h);
     }
-    const show = (h, kind, ms) => { h.kind = kind; h.until = performance.now() + ms; h.pre.textContent = ART[kind].join('\n'); h.b.dataset.kind = kind; };
-    const hit = (h) => {
-      if (state !== 'run') { start(); return; }
-      if (h.kind === 'bug') { score++; show(h, 'splat', 350); }
-      else if (h.kind === 'feature') { score = Math.max(0, score - 3); show(h, 'oops', 500); msg.textContent = 'That was a feature! -3'; }
-      scoreEl.textContent = pad2(score);
-    };
+    const ready = () => { state = 'ready'; msg.textContent = 'Tap any hole to start. Twenty seconds.'; };
     const start = () => {
       state = 'run'; score = 0; left = ROUND; scoreEl.textContent = '00'; timeEl.textContent = String(ROUND);
       msg.textContent = 'Go! Bugs only.';
-      clock = performance.now();
+      clock = performance.now(); spawnAt = 0;
       holes.forEach((h) => show(h, 'empty', 0));
       clearInterval(tick);
-      tick = setInterval(step, 100);
+      tick = setInterval(step, 80);
     };
-    let spawnAt = 0;
     const step = () => {
       const now = performance.now();
       left = ROUND - (now - clock) / 1000;
@@ -896,45 +941,48 @@
       if (left <= 0) {
         clearInterval(tick); state = 'over';
         holes.forEach((h) => show(h, 'empty', 0));
-        msg.innerHTML = `Squashed ${score} bug${score === 1 ? '' : 's'}. ${score >= 18 ? 'Hired.' : score >= 10 ? 'The bugs lost.' : 'The bugs are in production now.'} <button type="button" class="link ship-again">Play again</button>`;
-        $('.ship-again', msg).addEventListener('click', start);
+        msg.textContent = '';
+        winCard(box, `${score} bug${score === 1 ? '' : 's'} squashed`, score >= 18 ? 'Hired.' : score >= 10 ? 'The bugs lost.' : 'The bugs are in production now.', ready);
         return;
       }
       if (now > spawnAt) {
         const free = holes.filter((h) => h.kind === 'empty');
         if (free.length) {
-          const h = free[(Math.random() * free.length) | 0];
           const fast = Math.max(0, (ROUND - left) / ROUND);
-          show(h, Math.random() < 0.18 ? 'feature' : 'bug', 950 - fast * 420);
+          show(oneOf(free), Math.random() < 0.18 ? 'feature' : 'bug', 1050 - fast * 420);
         }
-        spawnAt = now + 520 - Math.min(260, (ROUND - left) * 14) + Math.random() * 200;
+        spawnAt = now + 540 - Math.min(260, (ROUND - left) * 14) + Math.random() * 200;
       }
     };
-    msg.textContent = 'Tap any hole to start. Twenty seconds.';
+    ready();
   }
 
-  /* ---- 4 · memory: match the tools ---- */
+  /* ---------- 5 · Memory: match the tools ---------- */
   const gMem = $('[data-game="memory"]');
   if (gMem) {
-    const cardsEl = $('[data-cards]', gMem), msg = $('[data-msg]', gMem), movesEl = $('[data-score]', gMem), bestEl = $('[data-best]', gMem);
+    const box = $('.game-box', gMem), cardsEl = $('[data-cards]', gMem), msg = $('[data-msg]', gMem), movesEl = $('[data-score]', gMem), bestEl = $('[data-best]', gMem);
     const PAIRS = [['react', '<o>'], ['python', '>>>'], ['kotlin', 'K>'], ['git', 'o-o'], ['docker', '[=]'], ['esp32', '|#|']];
-    let open = [], moves = 0, found = 0, lock = false, best = parseInt(lsGet('ksp-mem-best') || '0', 10) || 0;
+    let open = [], moves = 0, found = 0, lock = false, best = parseInt(store.get('ksp-mem-best') || '0', 10) || 0;
     if (best) bestEl.textContent = pad2(best);
     const setup = () => {
       cardsEl.innerHTML = ''; open = []; moves = 0; found = 0; lock = false; movesEl.textContent = '00';
       msg.textContent = 'Flip two cards at a time. Find all six pairs.';
-      shuffle(PAIRS.flatMap((p) => [p, p]).slice()).forEach(([name, icon]) => {
+      shuffle(PAIRS.flatMap((p) => [p, p])).forEach(([name, icon]) => {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'card'; b.dataset.name = name;
         b.setAttribute('aria-label', 'Hidden card');
-        b.innerHTML = `<span class="card-back mono">/ / /\n / / \n/ / /</span><span class="card-face mono"><b>${icon.replace(/[<>&]/g, escHtml)}</b>${name}</span>`;
+        const back = document.createElement('span'); back.className = 'card-back'; back.textContent = '?';
+        const face = document.createElement('span'); face.className = 'card-face';
+        const ic = document.createElement('b'); ic.textContent = icon;
+        face.append(ic, name);
+        b.append(back, face);
         b.addEventListener('click', () => flip(b));
         cardsEl.appendChild(b);
       });
     };
     const flip = (b) => {
       if (lock || b.classList.contains('up') || b.classList.contains('matched')) return;
-      b.classList.add('up'); b.setAttribute('aria-label', b.dataset.name);
+      b.classList.add('up'); b.setAttribute('aria-label', b.dataset.name); buzz(6);
       open.push(b);
       if (open.length < 2) return;
       moves++; movesEl.textContent = pad2(moves);
@@ -944,16 +992,46 @@
         msg.textContent = found < PAIRS.length ? `${a.dataset.name}, matched.` : '';
         if (found === PAIRS.length) {
           const rec = !best || moves < best;
-          if (rec) { best = moves; lsSet('ksp-mem-best', String(moves)); bestEl.textContent = pad2(moves); }
-          msg.innerHTML = `All matched in ${moves} moves. ${moves <= 8 ? 'Sharp memory.' : 'My toolbox, now yours.'}${rec ? ' New best!' : ''} <button type="button" class="link ship-again">Play again</button>`;
-          $('.ship-again', msg).addEventListener('click', setup);
+          if (rec) { best = moves; store.set('ksp-mem-best', String(moves)); bestEl.textContent = pad2(moves); }
+          winCard(box, `All matched in ${moves} moves`, (moves <= 8 ? 'Sharp memory.' : 'My toolbox, now yours.') + (rec ? ' New best!' : ''), setup);
         }
       } else {
         lock = true;
-        setTimeout(() => { a.classList.remove('up'); c.classList.remove('up'); a.setAttribute('aria-label', 'Hidden card'); c.setAttribute('aria-label', 'Hidden card'); lock = false; }, 750);
+        setTimeout(() => { a.classList.remove('up'); c.classList.remove('up'); a.setAttribute('aria-label', 'Hidden card'); c.setAttribute('aria-label', 'Hidden card'); lock = false; }, 700);
       }
     };
     setup();
+  }
+
+  /* =====================================================================
+     VISITOR COUNTER
+     The site has no server, so a free counting service keeps the number.
+     One visit = one browser session. If the service is down, the line stays hidden.
+     ===================================================================== */
+  const visits = $('[data-visits]');
+  if (visits) {
+    const COUNTER = 'https://abacus.jasoncameron.dev';
+    const KEY = 'pankqx.github.io/visits';
+    const live = location.hostname === 'pankqx.github.io';        // never count local testing
+    const counted = store.sget('ksp-counted');
+    fetch(`${COUNTER}/${live && !counted ? 'hit' : 'get'}/${KEY}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('counter'))))
+      .then((d) => {
+        const n = Number(d.value);
+        if (!n) return;
+        if (live) store.sset('ksp-counted', '1');
+        const out = $('[data-visits-n]', visits);
+        visits.hidden = false;
+        if (reduce) { out.textContent = '#' + pad4(n); return; }
+        const t0 = performance.now(), from = Math.max(0, n - 40);
+        const roll = (now) => {
+          const p = Math.min(1, (now - t0) / 900);
+          out.textContent = '#' + pad4(Math.round(from + (n - from) * (1 - Math.pow(1 - p, 3))));
+          if (p < 1) requestAnimationFrame(roll);
+        };
+        requestAnimationFrame(roll);
+      })
+      .catch(() => { /* counter is offline: the page works fine without it */ });
   }
 
   /* ---------- for the curious ones with DevTools open ---------- */

@@ -18,4 +18,4 @@ AI full-stack engineer · MCA ’27, St Aloysius · Founder of [ProntoPy.com](ht
 
 **Contact:** [pankqx@gmail.com](mailto:pankqx@gmail.com) · [LinkedIn](https://www.linkedin.com/in/pankqx)
 
-<sub>This repository also hosts the portfolio site itself: plain HTML, CSS and JavaScript, every drawing hand-set in SVG. Brand guidelines: [brand sheet](https://pankqx.github.io/pankqx/brand.html).</sub>
+<sub>This repository also hosts the portfolio site itself: plain HTML, CSS and JavaScript, every drawing hand-set in SVG.</sub>

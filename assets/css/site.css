@@ -786,17 +786,13 @@ canvas.game-screen { display: block; width: calc(100% - 36px); margin: 14px 18px
 body::before { display: block; opacity: 0.28; }             /* a little paper grain */
 [data-theme='blueprint'] body::before { opacity: 0.14; }
 
-/* hero kolam */
+/* hero drawing */
 .cover .wrap { position: relative; }
-.kolam { margin: clamp(28px, 6vw, 44px) 0 0; }
-.kolam canvas { display: block; width: 100%; aspect-ratio: 1; touch-action: pan-y; cursor: crosshair; }
-.kolam figcaption { margin-top: 6px; text-align: center; color: var(--ink-3); }
-.kolam .k-touch { color: var(--signal-ink); }
-.cover .stats { margin-top: clamp(64px, 8vw, 110px); }
+.hero-art { margin: clamp(24px, 5vw, 40px) auto 0; max-width: 420px; }
+.cover .stats { margin-top: clamp(56px, 7vw, 96px); }
 .stat b { font-size: clamp(44px, 6.2vw, 92px); font-stretch: 70%; font-weight: 850; }
-.stat span { font-size: 14.5px; }
 @media (min-width: 1000px) {
-  .kolam { position: absolute; z-index: 0; top: -24px; right: var(--pad); width: clamp(230px, 22vw, 360px); margin: 0; }
+  .hero-art { position: absolute; z-index: 0; top: -40px; right: 0; width: clamp(260px, 27vw, 420px); margin: 0; }
   .hello, .name, .cover-row, .cover .dim { position: relative; z-index: 1; }
   .name { width: max-content; }
 }
@@ -838,3 +834,24 @@ body::before { display: block; opacity: 0.28; }             /* a little paper gr
 
 /* bigger, more confident headings */
 .h2 { font-size: clamp(44px, 7.6vw, 112px); line-height: 0.92; }
+
+/* =====================================================================
+   Rev F · blue board
+   The blueprint is the first look. Faint grid, and every section is
+   clearly divided: a rule on top, a numbered header, framed panels.
+   ===================================================================== */
+body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px), linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); }
+.sheet { border-top: 1px solid var(--rule); }
+.cover, .about-intro, .band { border-top: 0; }
+.sh { align-items: center; margin-bottom: clamp(28px, 3.4vw, 44px); }
+.sh-no { color: var(--paper); background: var(--signal); padding: 5px 9px; }
+.sh-label { color: var(--ink-2); }
+.sh::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.flag-art, .pj-art, .cv-stage, .term, .game-box, .trait-a .sprite, .hero-art { border: 1px solid var(--rule-2) !important; }
+.hero-art { background: color-mix(in srgb, var(--paper) 70%, transparent); padding: 14px; }
+.trait, .trait.trait-a { border-top: 1px solid var(--rule) !important; padding-top: 22px !important; }
+.tr-row { border-bottom: 1px solid var(--rule-2); }
+.tr-items span { border: 1px solid var(--rule-2); }
+.cover .stats { border-top: 1px solid var(--rule); padding-top: 28px; }
+.marquee { border-top: 1px solid var(--rule); padding-top: clamp(20px, 4vw, 56px); }
+.band { background-image: none; }

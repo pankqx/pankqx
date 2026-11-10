@@ -73,7 +73,6 @@ Search for `Also built`. Copy one link, including the dot after it, and paste it
 | Toolbox | `class="tr-row`. Each folder is one row, and each tool is a `<span>` inside `tr-items` |
 | Contact | `<!-- 05 · CONTACT -->` |
 
-The letter animations (the progress bar, shapes, high five and drawing), the games (HTTP Dino, Catch the skills, Ship it, Squash the bugs, Memory) and the page wipe live in `assets/js/site.js`. To change the words that fall in Catch the skills, search for `const SKILLS`. For the memory cards, search for `const PAIRS`. Leave those to Claude unless you want to experiment.
 
 ### Game settings you can safely change (`assets/js/site.js`)
 
@@ -82,9 +81,7 @@ The letter animations (the progress bar, shapes, high five and drawing), the gam
 | How high the dino jumps, how fast it falls | `const GRAVITY = 62, JUMP = 27` |
 | Dino titles (intern, junior dev, ...) | `const RANKS` |
 | Dino game-over jokes | `const QUIPS` |
-| Words that fall in Catch the skills | `const SKILLS` |
 | Memory cards | `const PAIRS` |
-| Length of a round (seconds) | `ROUND = 20` |
 
 ## The visitor counter
 

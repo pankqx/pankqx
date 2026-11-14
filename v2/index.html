@@ -5,70 +5,126 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>K S Pankaj · AI Full-Stack Engineer</title>
 <meta name="description" content="K S Pankaj builds web, Android and AI products end to end. Founder of ProntoPy.">
+<meta name="theme-color" content="#000000">
 <meta property="og:title" content="K S Pankaj · AI Full-Stack Engineer">
 <meta property="og:image" content="https://pankqx.github.io/pankqx/assets/img/og.png">
 <link rel="icon" href="../assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="../assets/fonts/jetbrains-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<canvas id="glow" aria-hidden="true"></canvas>
-<header class="col nav">
-  <b>pankaj<i>.</i></b>
-  <div><span class="open">open to work</span><a href="#work">Work</a><a href="#about">About</a><a href="resume.html">Resume</a><a href="#contact">Contact</a></div>
-</header>
+<div class="frame">
+<header class="top"><a class="logo" href="#main">ksp</a><nav><a href="#about">About</a><a href="#experience">Experience</a><a href="#work" class="keep">Work</a><a href="#contact">Contact</a><a class="res" href="resume.html">Resume</a></nav></header>
 
 <main id="main">
-<div class="col hero">
-  <span class="mono prompt">~ whoami</span>
-  <h1>K S<br>Pankaj<i>_</i></h1>
-  <p class="lead">I turn ideas into products <em>people actually use.</em></p>
-  <p class="sub">AI full-stack engineer. Web, Android and AI, built and shipped end to end. Founder of ProntoPy.</p>
-  <div class="cta"><a class="btn" href="resume.html">Resume</a><a class="btn ghost" href="#work">See the work</a></div>
+<div class="hero">
+  <span class="badge">Open to internships &amp; full-time · ready to relocate</span>
+  <h1>K S<br><span>Pankaj</span><i>_</i></h1>
+  <p>I turn ideas into <b>products people actually use.</b> Web, Android and AI, designed, built and shipped end to end. Founder of ProntoPy. Fuelled by coffee.</p>
+  <div class="cta"><a class="btn" href="resume.html">View resume <s>→</s></a><a class="btn ghost" href="#work">See the work</a></div>
 </div>
 
-<div class="col stats">
-  <div data-block><b>30+</b><span>repos shipped</span></div>
-  <div data-block><b>940</b><span>problems in ProntoPy</span></div>
-  <div data-block><b>4</b><span>platforms, one app</span></div>
+<div class="stats rule">
+  <div data-block><b>30+</b><span>Repos shipped</span></div>
+  <div data-block><b>940</b><span>Problems in ProntoPy</span></div>
+  <div data-block><b>4</b><span>Platforms, one app</span></div>
   <div data-block><b>No.1</b><span>Round 1, CODE MEET 2026</span></div>
 </div>
 
-<section class="col" id="work">
-  <header><span class="no">01</span><span class="mono prompt">$ cat work.md</span></header>
-  <h2>Things I've <em>built.</em></h2>
-  <div class="bento">
-    <article class="card wide" data-block><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="44" y="24" width="32" height="32" rx="3"/><path d="M52 24v-8M60 24v-8M68 24v-8M52 64v-8M60 64v-8M68 64v-8M44 32h-8M44 40h-8M44 48h-8M84 32h-8M84 40h-8M84 48h-8M8 40h28M84 40h28"/><path d="M54 46l5-10 5 10M66 36v10"/></svg><div><span class="mono">React · Pyodide</span><h3><a href="https://python-dsa-sigma.vercel.app/" target="_blank" rel="noopener">ProntoPy</a><small>beta</small></h3><p>A free school for Python, DSA and AI/ML that runs in the browser, even offline. 47 modules, 940 problems, judged against hidden tests.</p></div></article>
-    <article class="card " data-block><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="14" y="16" width="26" height="48" rx="4"/><path d="M23 58h8"/><path d="M40 34c14-22 28-22 40 0" stroke-dasharray="3 4"/><rect x="74" y="26" width="34" height="24" rx="2"/><path d="M68 56h46"/></svg><div><span class="mono">Python · Kotlin</span><h3><a href="https://github.com/pankqx/tonefer" target="_blank" rel="noopener">Tonefer</a></h3><p>Private, encrypted transfer between phone and laptop. Ubuntu, Windows and Android.</p></div></article>
-    <article class="card " data-block><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><path d="M30 14c0 34 60 34 60 0"/><circle cx="60" cy="50" r="12"/><path d="M53 50h4l3-6 4 12 3-6h4"/></svg><div><span class="mono">React · ESP32</span><h3><a href="https://pankqx.github.io/MindMirror/" target="_blank" rel="noopener">MindMirror</a></h3><p>A student wellness app with an AI necklace. No. 1 in Round 1, top 5 of 100 teams at CODE MEET 2026.</p></div></article>
-    <article class="card " data-block><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><circle cx="42" cy="32" r="12"/><path d="M22 66c0-14 40-14 40 0"/><circle cx="80" cy="32" r="12" stroke-dasharray="3 4"/><path d="M60 66c0-14 40-14 40 0" stroke-dasharray="3 4"/></svg><div><span class="mono">Next.js · LLM</span><h3><a href="https://paroh-twin.vercel.app" target="_blank" rel="noopener">Paroh</a></h3><p>A consent-first digital twin built in 24 hours.</p></div></article>
-    <article class="card " data-block><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="10" y="30" width="26" height="20" rx="3"/><rect x="84" y="12" width="26" height="20" rx="3"/><rect x="84" y="48" width="26" height="20" rx="3"/><path d="M36 40h20c10 0 10-18 28-18M56 40c10 0 10 18 28 18"/></svg><div><span class="mono">React · TypeScript</span><h3><a href="https://github.com/pankqx/flow-magic" target="_blank" rel="noopener">Flow &amp; Magic</a></h3><p>Type, speak or gesture and an animated diagram appears. Made for presenters.</p></div></article>
-    <article class="card wide" data-block><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><path d="M24 34l36-14 36 14v22l-36 14-36-14z"/><path d="M24 34l36 14 36-14M60 48v22"/></svg><div><span class="mono">React · Supabase</span><h3><a href="https://pankqx.github.io/thebrowniepress/" target="_blank" rel="noopener">The Brownie Press</a></h3><p>Storefront and owner dashboard for a home bakery, with orders sent straight to WhatsApp.</p></div></article>
-  </div>
-  <p class="more">30+ more on <a href="https://github.com/pankqx" target="_blank" rel="noopener">GitHub</a>.</p>
+<div class="ticker rule" aria-hidden="true"><div><span>React</span><span>Next.js</span><span>TypeScript</span><span>Python</span><span>Kotlin</span><span>Node.js</span><span>PostgreSQL</span><span>MongoDB</span><span>ESP32</span><span>Docker</span><span>Supabase</span><span>Angular</span><span>React</span><span>Next.js</span><span>TypeScript</span><span>Python</span><span>Kotlin</span><span>Node.js</span><span>PostgreSQL</span><span>MongoDB</span><span>ESP32</span><span>Docker</span><span>Supabase</span><span>Angular</span></div></div>
+
+<section class="rule" id="about">
+  <div class="sec-h"><b>01</b><span>About</span></div>
+  <div class="body"><div>
+    <div class="pad text rise">
+      <h2>Builds first, <em>talks later.</em></h2>
+      <p>Hi, I'm <b>Pankaj</b>. MCA student at St Aloysius (2027), founder of ProntoPy, and someone who would rather build it than talk about it.</p>
+      <p>I'm packing my bags for wherever the right team is. Internship or full-time, I'm ready to move.</p>
+      <p>Off the keyboard: chess, the gym, cricket, books, and the occasional short-film script.</p>
+    </div>
+    <div class="cells two">
+      <div class="rise" data-block><small>Learns on the job</small><h3>Fast learner</h3><p>Kotlin for an Android app, Arduino C for a necklace, Angular for a leave system. The deadline usually arrives before the tutorial ends, and the app still ships.</p></div>
+      <div class="rise" data-block><small>Fits any socket</small><h3>Adaptable</h3><p>Web, Android, desktop, hardware, Shopify, and one 24-hour hackathon on zero sleep. I go wherever the problem is and set up camp.</p></div>
+      <div class="rise" data-block><small>Plays well with others</small><h3>Team player</h3><p>Hackathons with team HTTP Dino, a developer community I co-founded, a coding event for 25+ colleges. My best work has more than one name on it.</p></div>
+      <div class="rise" data-block><small>Draws with code</small><h3>Creative</h3><p>I design what I build, and I write short-film scripts on the side.</p></div>
+    </div>
+    <div class="strip"><div class="icons"><a href="https://github.com/pankqx" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/pankqx" target="_blank" rel="noopener">LinkedIn</a><a href="mailto:pankqx@gmail.com">Email</a></div><a class="btn" href="resume.html">Download CV <s>↓</s></a></div>
+  </div></div>
 </section>
 
-<section class="col" id="about">
-  <header><span class="no">02</span><span class="mono prompt">$ cat about.md</span></header>
-  <h2>Builds first, <em>talks later.</em></h2>
-  <div class="prose">
-    <p>I'm Pankaj, an MCA student at St Aloysius (2027). I learn fast, adapt to whatever the problem needs, and work well in a team.</p>
-  </div>
-  <ul class="tags"><li>Fast learner</li><li>Adaptable</li><li>Creative</li><li>Team player</li></ul>
-  <span class="mono prompt log">$ cat experience.log</span>
-  <div class="logrow" data-block><span>2026 – now</span><p><b>Founder &amp; Developer</b>, ProntoPy</p></div>
-  <div class="logrow" data-block><span>Jun 2026</span><p><b>Software Developer Intern</b>, Prasanna Technologies</p></div>
-  <div class="logrow" data-block><span>May 2026</span><p><b>Freelance Developer</b>, House of Anaika</p></div>
-  <div class="logrow" data-block><span>2023 – 2024</span><p><b>IT Head (freelance)</b>, Govt First Grade College, Malur · NAAC accreditation</p></div>
+<section class="rule" id="how">
+  <div class="sec-h"><b>02</b><span>How I work</span></div>
+  <div class="body"><div class="pad text rise">
+    <h2>Enterprise software with AI, <em>in less time, at less cost.</em></h2>
+    <p>AI is a power tool in my workshop, not the carpenter. It speeds up the typing. The architecture, the reviews and the final call are mine.</p>
+    <ul class="pills"><li>Spec</li><li>Slice</li><li>Generate</li><li>Verify</li><li>Ship</li></ul>
+    <div class="code"><header><i></i><i></i><i></i><span>how-i-work.ts</span></header><pre><u>// every feature goes through the same five steps</u>
+<b>const</b> feature = spec(brief, dataModel, tests);   <u>// written first</u>
+<b>for</b> (<b>const</b> slice <b>of</b> split(feature)) {         <u>// small pieces that work alone</u>
+  <b>const</b> code = <b>await</b> agents.generate(slice);
+  verify(code, slice.tests);                    <u>// tests sign it off, not vibes</u>
+}
+ship();                                         <u>// then coffee</u></pre></div>
+  </div></div>
 </section>
 
-<section class="col" id="contact">
-  <header><span class="no">03</span><span class="mono prompt">$ cat hire.me</span></header>
-  <a class="mail" href="mailto:pankqx@gmail.com">pankqx@gmail.com</a>
-  <div class="links"><a href="https://www.linkedin.com/in/pankqx" target="_blank" rel="noopener">LinkedIn ↗</a><a href="https://github.com/pankqx" target="_blank" rel="noopener">GitHub ↗</a><a href="resume.html">Resume ↗</a></div>
+<section class="rule" id="experience">
+  <div class="sec-h"><b>03</b><span>Experience</span></div>
+  <div class="body"><div>
+    <div class="pad"><h2>Where I've <em>put in the hours.</em></h2></div>
+    <div class="xp rise" data-block><time>2026 → now</time><h3>Founder · ProntoPy</h3><p>Built a free school for Python, DSA and AI/ML. Also its designer, teacher and the only person on support.</p></div>
+    <div class="xp rise" data-block><time>Jun 2026</time><h3>Software Developer Intern · Prasanna Technologies</h3><p>Configuration-driven forms and UI for enterprise software. Chased backend bugs through logs and PostgreSQL. The bugs lost.</p></div>
+    <div class="xp rise" data-block><time>May 2026</time><h3>Freelance Developer · House of Anaika</h3><p>Shopify store with 300+ products, a lead-finding Python bot, and actual cold calls. On an actual phone.</p></div>
+    <div class="xp rise" data-block><time>2026</time><h3>Hackathons · CODE MEET and GATEWAYS</h3><p>MindMirror: No. 1 in Round 1, top 5 of 100 teams in Round 2 at Srinivas University. Paroh: Round 2 out of 150+ teams, built in 24 hours.</p></div>
+    <div class="xp rise" data-block><time>Jun 2023 · 11 months</time><h3>IT Head (freelance) · Govt First Grade College, Malur</h3><p>Ran the tech side of the college's NAAC accreditation. Designed a simple way for teachers to hand in their data, organised every document by criterion, ran the website and designed the brochure.</p></div>
+  </div></div>
+</section>
+
+<section class="rule" id="work">
+  <div class="sec-h"><b>04</b><span>Work</span></div>
+  <div class="body"><div>
+    <div class="pad"><h2>Things I've <em>built.</em></h2></div>
+    <div class="bento">
+      <article class="card rise" data-block><div class="thumb"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="44" y="24" width="32" height="32" rx="3"/><path d="M52 24v-8M60 24v-8M68 24v-8M52 64v-8M60 64v-8M68 64v-8M44 32h-8M44 40h-8M44 48h-8M84 32h-8M84 40h-8M84 48h-8M8 40h28M84 40h28"/><path d="M54 46l5-10 5 10M66 36v10"/></svg></div><div class="t"><small><span>prontopy.com</span><em>beta</em></small><h3><a href="https://python-dsa-sigma.vercel.app/" target="_blank" rel="noopener">ProntoPy</a></h3><q>I kept forgetting DSA, so I built an entire school for it.</q><p>A free school for Python, DSA and AI/ML that runs right in your browser, even offline. 47 modules, 940 problems, every answer judged against hidden tests.</p></div></article>
+      <article class="card rise" data-block><div class="thumb"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="14" y="16" width="26" height="48" rx="4"/><path d="M23 58h8"/><path d="M40 34c14-22 28-22 40 0" stroke-dasharray="3 4"/><rect x="74" y="26" width="34" height="24" rx="2"/><path d="M68 56h46"/></svg></div><div class="t"><small><span>desktop + android</span><em>released</em></small><h3><a href="https://github.com/pankqx/tonefer" target="_blank" rel="noopener">Tonefer</a></h3><q>Because emailing photos to myself felt like a cry for help.</q><p>Private, offline transfer between phone and laptop. Pair once with a QR code; after that everything is end-to-end encrypted.</p></div></article>
+      <article class="card rise" data-block><div class="thumb"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><path d="M30 14c0 34 60 34 60 0"/><circle cx="60" cy="50" r="12"/><path d="M53 50h4l3-6 4 12 3-6h4"/></svg></div><div class="t"><small><span>web + hardware</span><em>hackathon</em></small><h3><a href="https://pankqx.github.io/MindMirror/" target="_blank" rel="noopener">MindMirror</a></h3><q>A necklace that notices your stress before your exams do.</q><p>A calm web app plus a talking AI necklace (ESP32) that helps students spot early stress against their own normal.</p></div></article>
+      <article class="card rise" data-block><div class="thumb"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><circle cx="42" cy="32" r="12"/><path d="M22 66c0-14 40-14 40 0"/><circle cx="80" cy="32" r="12" stroke-dasharray="3 4"/><path d="M60 66c0-14 40-14 40 0" stroke-dasharray="3 4"/></svg></div><div class="t"><small><span>ai web app</span><em>24 hours</em></small><h3><a href="https://paroh-twin.vercel.app" target="_blank" rel="noopener">Paroh</a></h3><q>A digital twin that only learns what you approve.</q><p>It asks questions out loud, turns your answers into facts, waits for your OK, then runs what-if simulations.</p></div></article>
+      <article class="card rise" data-block><div class="thumb"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="10" y="30" width="26" height="20" rx="3"/><rect x="84" y="12" width="26" height="20" rx="3"/><rect x="84" y="48" width="26" height="20" rx="3"/><path d="M36 40h20c10 0 10-18 28-18M56 40c10 0 10 18 28 18"/></svg></div><div class="t"><small><span>presenter tool</span><em>in progress</em></small><h3><a href="https://github.com/pankqx/flow-magic" target="_blank" rel="noopener">Flow &amp; Magic</a></h3><q>Say “TCP handshake”. Watch the diagram show up on its own.</q><p>Type, speak or gesture a concept and the right animated diagram appears. 131 automated tests keep it honest.</p></div></article>
+      <article class="card rise" data-block><div class="thumb"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><circle cx="24" cy="40" r="6"/><circle cx="60" cy="40" r="6"/><circle cx="96" cy="40" r="6"/><circle cx="60" cy="16" r="6"/><path d="M30 40h24M66 40h24M28 35c8-14 16-19 26-19M66 16c12 0 20 6 26 19"/></svg></div><div class="t"><small><span>learning platform</span><em>free</em></small><h3><a href="https://github.com/pankqx/Bossgit" target="_blank" rel="noopener">BossGit</a></h3><q>Because “git push --force” should not be a personality.</q><p>A free course from zero to Git internals, with a real Git repository running inside your browser tab.</p></div></article>
+    </div>
+    <div class="strip"><span style="color:var(--soft)">30+ more on GitHub</span><a class="btn ghost" href="https://github.com/pankqx" target="_blank" rel="noopener">View all <s>→</s></a></div>
+  </div></div>
+</section>
+
+<section class="rule" id="toolbox">
+  <div class="sec-h"><b>05</b><span>Toolbox</span></div>
+  <div class="body"><div>
+    <div class="pad"><h2>What's in <em>the bag.</em></h2></div>
+    <div class="cells two">
+      <div class="rise" data-block><small>languages/</small><p>TypeScript · JavaScript · Python · Kotlin · Java · C# · SQL</p></div>
+      <div class="rise" data-block><small>frontend/</small><p>React · Next.js · Angular · Vite · three.js</p></div>
+      <div class="rise" data-block><small>backend/</small><p>Node.js · Express · aiohttp · ASP.NET Core · REST · WebSockets</p></div>
+      <div class="rise" data-block><small>data/</small><p>PostgreSQL · MongoDB · SQLite · Supabase</p></div>
+      <div class="rise" data-block><small>ai/</small><p>Claude · Groq · OpenRouter · Ollama · voice (TTS/STT)</p></div>
+      <div class="rise" data-block><small>ship/</small><p>GitHub Actions · Docker · Ubuntu · Vercel · ESP32</p></div>
+    </div>
+  </div></div>
+</section>
+
+<section class="rule" id="contact">
+  <div class="sec-h"><b>06</b><span>Contact</span></div>
+  <div class="body"><div>
+    <div class="pad text"><h2>Say hello. <em>I reply fast.</em></h2><p>Internship or full-time, anywhere. The fastest way to reach me is email.</p></div>
+    <a class="mail" href="mailto:pankqx@gmail.com">pankqx@gmail.com</a>
+  </div></div>
 </section>
 </main>
 
-<footer class="col mono"><span>© 2026 K S Pankaj · Made with love</span><span data-visits hidden>Visitor <b data-visits-n></b></span></footer>
+<footer class="rule">
+  <div class="foot"><div class="big">ksp_</div><div><h4>Navigate</h4><a href="#about">About</a><a href="#how">How I work</a><a href="#experience">Experience</a><a href="#work">Work</a></div><div><h4>Elsewhere</h4><a href="https://github.com/pankqx" target="_blank" rel="noopener">GitHub</a><a href="https://www.linkedin.com/in/pankqx" target="_blank" rel="noopener">LinkedIn</a><a href="https://python-dsa-sigma.vercel.app/" target="_blank" rel="noopener">ProntoPy</a></div><div><h4>Hire</h4><a href="resume.html">Resume</a><a href="mailto:pankqx@gmail.com">Email</a></div></div>
+  <div class="end"><span>© 2026 K S Pankaj · Made with love · Love to collab</span><span data-visits hidden>Visitor <b data-visits-n></b></span></div>
+</footer>
+</div>
 <script>(function(){var s=document.createElement('script');s.src=/[?&]edit\b/.test(location.search)?'edit.js':'app.js';document.body.appendChild(s);})();</script>
 </body>
 </html>

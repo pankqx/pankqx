@@ -38,7 +38,7 @@
       const fit = () => { canvas.width = canvas.clientWidth / 2; canvas.height = canvas.clientHeight / 2; gl.viewport(0, 0, canvas.width, canvas.height); };   // half size: it is a blur anyway
       const draw = (ms) => {
         gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, ms / 1000); gl.uniform1f(uD, dark.matches ? 1 : 0);
+        gl.uniform2f(uR, canvas.width, canvas.height); gl.uniform1f(uT, ms / 1000); gl.uniform1f(uD, 1);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
       };
       const loop = (ms) => { if (scrollY < innerHeight && !document.hidden) draw(ms); requestAnimationFrame(loop); };

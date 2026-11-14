@@ -14,7 +14,7 @@ AI full-stack engineer · MCA ’27, St Aloysius · Founder of [ProntoPy.com](ht
 | **[Flow & Magic](https://github.com/pankqx/flow-magic)** | Say a concept, get the right diagram on screen. Agent-built, 131 tests. |
 | **[BossGit](https://github.com/pankqx/Bossgit)** | Learn Git with a real Git repository running in your browser. |
 
-**Stack:** TypeScript · React · Next.js · Angular · Node · Python · Kotlin · C# · PostgreSQL · MongoDB · Supabase · Docker · GitHub Actions · Claude Code · Codex
+**Stack:** TypeScript · React · Next.js · Angular · Node · Python · Kotlin · C# · PostgreSQL · MongoDB · Supabase · Docker 
 
 **Contact:** [pankqx@gmail.com](mailto:pankqx@gmail.com) · [LinkedIn](https://www.linkedin.com/in/pankqx)
 

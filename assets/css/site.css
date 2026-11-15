@@ -860,30 +860,6 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .flag-code b { color: var(--signal); font-weight: 500; }
 .flag-art { align-items: stretch; }
 
-/* =====================================================================
-   Rev G · boxed
-   Every section is a framed box with corner marks. Panels inside are boxes too.
-   ===================================================================== */
-.sheet { border-top: 0; padding: clamp(7px, 1vw, 14px) 0; }
-.cover, .about-intro { padding-top: calc(var(--bar-h) + 14px); }
-.sheet > .wrap { position: relative; width: calc(100% - 24px); max-width: var(--max); margin: 0 auto; border: 1px solid var(--rule); padding: clamp(26px, 4.4vw, 64px) clamp(18px, 3.6vw, 52px); background: color-mix(in srgb, var(--paper) 78%, transparent); }
-.sheet > .wrap::before, .sheet > .wrap::after { content: ''; position: absolute; width: 9px; height: 9px; background: var(--signal); }
-.sheet > .wrap::before { top: -5px; left: -5px; }
-.sheet > .wrap::after { bottom: -5px; right: -5px; }
-.band { background: none; padding: clamp(7px, 1vw, 14px) 0; }
-.band > .wrap { background: var(--paper); }
-.contact.band { padding-bottom: 14px; }
-.stats { gap: 10px !important; border-top: 0 !important; padding-top: 0 !important; }
-.stat { border: 1px solid var(--rule-2) !important; padding: 18px 16px !important; }
-.stat + .stat { padding-left: 16px !important; }
-.trait, .trait.trait-a { border: 1px solid var(--rule) !important; padding: 22px !important; }
-.traits { gap: 12px; }
-.gitlog, .tree, .who, .cup, .build, .circuit, .cv-list, .also, .hello-strip, .flag-body, .specs div { border: 1px solid var(--rule-2); padding: clamp(16px, 2.4vw, 28px); }
-.specs { gap: 10px; }
-.flag-art { padding: clamp(14px, 3vw, 32px); }
-.hello-strip { margin-top: 14px; }
-.next > .wrap { padding-bottom: clamp(18px, 3vw, 40px); }
-
 /* the ProntoPy chip */
 .pchip { width: 100%; height: auto; max-width: 440px; margin: 0 auto; }
 .pchip .pc-l { fill: none; stroke: var(--ink-2); stroke-width: 1.4; }
@@ -897,3 +873,100 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .pchip .pc-okt { fill: var(--signal); }
 .pchip .pc-big { font-family: var(--f-sans); font-weight: 900; font-size: 44px; fill: var(--paper); }
 .pchip .pc-s { font-size: 7.5px; letter-spacing: 0.14em; fill: var(--paper); opacity: 0.75; }
+
+/* =====================================================================
+   Rev H · black and white
+   Two themes: black (the first look) and white. One warm accent that runs
+   from orange to amber. No boxes around sections, no blue.
+   ===================================================================== */
+:root {
+  --paper: #faf9f6; --paper-2: #f0eee8; --paper-3: #e4e1d8; --surface: #f3f1eb;
+  --ink: #0e0e10; --ink-2: #45443f; --ink-3: #8a877e;
+  --rule: rgba(14, 14, 16, 0.16); --rule-2: rgba(14, 14, 16, 0.08);
+  --grid: rgba(14, 14, 16, 0.028); --grid-major: rgba(14, 14, 16, 0.05);
+  --signal: #ff4e1b; --signal-ink: #c93a0c; --chip: #0e0e10; --chip-ink: #faf9f6;
+  --grad: linear-gradient(100deg, #ff4e1b 10%, #ff9a3c 90%);
+  color-scheme: light;
+}
+:root[data-theme='blueprint'] {
+  --paper: #09090a; --paper-2: #121214; --paper-3: #1b1b1e; --surface: #111113;
+  --ink: #f5f2ea; --ink-2: #b9b5aa; --ink-3: #77746b;
+  --rule: rgba(245, 242, 234, 0.2); --rule-2: rgba(245, 242, 234, 0.1);
+  --grid: rgba(245, 242, 234, 0.022); --grid-major: rgba(245, 242, 234, 0.045);
+  --signal: #ff5a26; --signal-ink: #ffa15e; --chip: #1b1b1e; --chip-ink: #f5f2ea;
+  --grad: linear-gradient(100deg, #ff5a26 10%, #ffc070 90%);
+  color-scheme: dark;
+}
+/* the dark band flips in the white theme and lifts slightly in the black one */
+.band { --paper: #0e0e10; --paper-2: #18181b; --surface: #18181b; --ink: #f5f2ea; --ink-2: #b9b5aa; --ink-3: #77746b; --signal-ink: #ffa15e; }
+:root[data-theme='blueprint'] .band { --paper: #111113; --paper-2: #1a1a1d; --surface: #1a1a1d; --ink: #f5f2ea; --ink-2: #b9b5aa; --ink-3: #77746b; }
+.hero-art { display: none; }
+
+/* the accent: serif phrases and number tags glow from orange to amber */
+.h2 .serif, .statement .serif, .flag-quote, .nx-t .serif, .gw-t { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; padding-right: 0.08em; }
+.nextcard .nx-t .serif { background: none; color: inherit; }
+.sh-no { background: var(--grad); color: #0e0e10; }
+.btn-fast { background: var(--grad); color: #0e0e10; border-color: transparent; }
+.btn-fast::before { background: var(--ink); }
+.btn-fast:hover { color: var(--paper); }
+.tour { display: inline-block; margin-top: 14px; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule); padding-bottom: 2px; transition: color 0.25s, border-color 0.25s; }
+.tour:hover { color: var(--signal-ink); border-color: var(--signal); }
+
+/* ---------- hero reel: the project drawings, one after another ---------- */
+.reel { margin: clamp(26px, 5vw, 40px) 0 0; }
+.reel-stage { position: relative; aspect-ratio: 16 / 10; background: var(--surface); border: 1px solid var(--rule-2); overflow: hidden; cursor: pointer; }
+.reel-item { position: absolute; inset: 0; display: grid; place-items: center; padding: clamp(14px, 3vw, 26px); opacity: 0; transform: scale(0.96); transition: opacity 0.6s, transform 0.9s var(--ease); pointer-events: none; }
+.reel-item.on { opacity: 1; transform: none; }
+.reel-item svg { width: 100%; height: 100%; }
+.reel-bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--grad); transform-origin: left; transform: scaleX(0); }
+.reel-bar.run { animation: reel-run var(--reel-ms, 3800ms) linear forwards; }
+@keyframes reel-run { to { transform: scaleX(1); } }
+.reel-cap { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin-top: 12px; }
+.reel-cap b { font-weight: 800; font-stretch: 92%; font-size: 19px; letter-spacing: -0.01em; }
+.reel-cap span { display: block; color: var(--ink-2); font-size: 14.5px; line-height: 1.4; }
+.reel-cap button { flex: none; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--signal-ink); white-space: nowrap; }
+.reel-dots { display: flex; gap: 6px; margin-top: 12px; }
+.reel-dots button { width: 22px; height: 12px; display: grid; place-items: center; }
+.reel-dots button::before { content: ''; width: 100%; height: 2px; background: var(--rule); transition: background-color 0.3s; }
+.reel-dots button.on::before { background: var(--signal); }
+@media (min-width: 1000px) {
+  .cover .wrap { position: relative; }
+  .reel { position: absolute; z-index: 0; top: -34px; right: var(--pad); width: clamp(210px, 19.5vw, 320px); margin: 0; }
+  .hello, .name, .cover-row, .cover .dim { position: relative; z-index: 1; }
+  .name { width: max-content; }
+  .cover-row { margin-top: clamp(60px, 9vw, 120px); }
+}
+
+/* ---------- the 30-second lane ---------- */
+.lane { position: fixed; inset: 0; z-index: 90; display: none; overflow-y: auto; background: var(--paper); color: var(--ink); }
+.lane.is-open { display: block; animation: lane-in 0.5s var(--ease); }
+@keyframes lane-in { from { opacity: 0; transform: translateY(18px); } }
+.lane-top { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 14px var(--pad); background: var(--paper); border-bottom: 1px solid var(--rule-2); }
+.lane-clock { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; color: var(--ink-3); }
+.lane-clock b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; min-width: 3ch; }
+.lane-meter { flex: 1; max-width: 340px; height: 2px; background: var(--rule-2); overflow: hidden; }
+.lane-meter i { display: block; height: 100%; background: var(--grad); transform-origin: left; transform: scaleX(0); }
+.lane.is-open .lane-meter i { animation: reel-run 30s linear forwards; }
+.lane-x { height: 40px; padding: 0 16px; border: 1px solid var(--rule); font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+.lane-x:hover { background: var(--ink); color: var(--paper); }
+.lane-in { max-width: 1180px; margin: 0 auto; padding: clamp(26px, 5vw, 60px) var(--pad) 60px; }
+.lane h2 { margin: 0 0 8px; font-size: clamp(38px, 7vw, 88px); font-weight: 850; font-stretch: 88%; line-height: 0.95; letter-spacing: -0.03em; }
+.lane-sub { margin: 0 0 clamp(24px, 4vw, 44px); color: var(--ink-2); max-width: 52ch; }
+.lane-grid { display: grid; gap: 14px; }
+.lane-card { display: flex; flex-direction: column; border: 1px solid var(--rule-2); background: var(--surface); transition: transform 0.4s var(--ease), border-color 0.3s; }
+.lane-card:hover { transform: translateY(-4px); border-color: var(--signal); }
+.lane-art { aspect-ratio: 16 / 10; display: grid; place-items: center; padding: 16px; border-bottom: 1px solid var(--rule-2); }
+.lane-art svg { width: 100%; height: 100%; }
+.lane-t { padding: 16px 18px 20px; }
+.lane-t small { color: var(--signal-ink); }
+.lane-t h3 { margin: 6px 0 6px; font-size: 24px; font-weight: 800; font-stretch: 92%; letter-spacing: -0.015em; }
+.lane-t p { margin: 0; color: var(--ink-2); font-size: 15px; line-height: 1.5; }
+.lane-cv { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-top: 14px; padding: clamp(20px, 3vw, 34px); background: var(--ink); color: var(--paper); }
+.lane-cv b { display: block; font-size: clamp(22px, 3vw, 34px); font-weight: 800; font-stretch: 90%; letter-spacing: -0.02em; line-height: 1.05; }
+.lane-cv span { color: color-mix(in srgb, var(--paper) 70%, transparent); font-size: 14.5px; }
+.lane-cv div:last-child { display: flex; flex-wrap: wrap; gap: 10px; }
+.lane-cv .btn { background: var(--grad); color: #0e0e10; border-color: transparent; }
+.lane-cv .btn-ghost { background: none; color: var(--paper); border-color: color-mix(in srgb, var(--paper) 40%, transparent); }
+.lane-end { margin: 22px 0 0; color: var(--ink-3); }
+@media (min-width: 860px) { .lane-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .reel-bar.run, .lane.is-open .lane-meter i, .lane.is-open { animation: none; } }

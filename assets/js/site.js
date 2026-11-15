@@ -530,6 +530,98 @@
   }
 
   /* =====================================================================
+     HERO REEL + THE 30-SECOND LANE
+     The reel borrows the project drawings already on the page and shows
+     them one after another. The lane is a full-screen shortcut for
+     visitors in a hurry: three projects and the resume.
+     ===================================================================== */
+  const reel = $('[data-reel]');
+  const pjs = $$('.pj');
+  const chipArt = $('.flag-art svg');
+  const copyArt = (svg) => { const c = svg.cloneNode(true); c.classList.remove('in'); c.removeAttribute('role'); c.setAttribute('aria-hidden', 'true'); return c; };
+  const redraw = (svg) => { svg.classList.remove('in'); void svg.getBoundingClientRect(); svg.classList.add('in'); };   // plays the draw-in again
+  if (reel) {
+    const slides = [];
+    if (chipArt) slides.push({ svg: chipArt, name: 'ProntoPy', line: 'I kept forgetting DSA, so I built an entire school for it.', go: () => $('#prontopy').scrollIntoView() });
+    pjs.forEach((pj) => {
+      const head = $('.pj-head', pj), svg = $('.pj-art svg', pj), t = $('.t', pj), q = $('.pj-quip', pj);
+      if (head && svg && t) slides.push({ svg, name: t.textContent.trim(), line: q ? q.textContent.trim() : '', go: () => { head.click(); head.scrollIntoView({ block: 'center' }); } });
+    });
+    if (slides.length) {
+      const REEL_MS = 3800;
+      const stage = document.createElement('div'); stage.className = 'reel-stage';
+      const bar = document.createElement('i'); bar.className = 'reel-bar';
+      const cap = document.createElement('figcaption'); cap.className = 'reel-cap';
+      cap.innerHTML = '<div><b></b><span></span></div><button type="button">Open →</button>';
+      const dots = document.createElement('div'); dots.className = 'reel-dots';
+      let at = -1, timer = 0, hold = false, visible = false;
+      const plan = () => { clearTimeout(timer); if (!reduce && visible && !hold && !document.hidden) timer = setTimeout(() => show(at + 1), REEL_MS); };
+      const show = (i, byHand) => {
+        at = (i + slides.length) % slides.length;
+        slides.forEach((sl, k) => { sl.item.classList.toggle('on', k === at); sl.dot.classList.toggle('on', k === at); });
+        redraw(slides[at].copy);
+        $('b', cap).textContent = slides[at].name;
+        $('span', cap).textContent = slides[at].line;
+        bar.classList.remove('run'); void bar.offsetWidth;
+        if (byHand) hold = true;
+        if (!reduce && !hold) bar.classList.add('run');
+        plan();
+      };
+      slides.forEach((sl, i) => {
+        const item = document.createElement('div'); item.className = 'reel-item';
+        sl.copy = copyArt(sl.svg); item.appendChild(sl.copy); sl.item = item; stage.appendChild(item);
+        const d = document.createElement('button'); d.type = 'button'; d.setAttribute('aria-label', 'Show ' + sl.name);
+        d.addEventListener('click', () => show(i, true)); sl.dot = d; dots.appendChild(d);
+      });
+      stage.appendChild(bar);
+      reel.append(stage, cap, dots);
+      reel.style.setProperty('--reel-ms', REEL_MS + 'ms');
+      reel.hidden = false;
+      const openProject = () => slides[Math.max(0, at)].go();
+      stage.addEventListener('click', openProject);
+      $('button', cap).addEventListener('click', openProject);
+      if (fine) {
+        reel.addEventListener('pointerenter', () => { hold = true; clearTimeout(timer); bar.classList.remove('run'); });
+        reel.addEventListener('pointerleave', () => { hold = false; show(at); });
+      }
+      new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && at < 0) show(0); else plan(); }, { threshold: 0.25 }).observe(reel);
+      document.addEventListener('visibilitychange', plan);
+    }
+  }
+
+  const lane = $('[data-lane]');
+  if (lane) {
+    const nEl = $('[data-lane-n]', lane), endEl = $('[data-lane-end]', lane);
+    let tick = 0, lastFocus = null;
+    $$('[data-lane-art]', lane).forEach((slot) => {
+      const key = slot.getAttribute('data-lane-art');
+      const src = key === 'chip' ? chipArt : pjs[+key] && $('.pj-art svg', pjs[+key]);
+      if (src) slot.appendChild(copyArt(src));
+    });
+    const closeLane = () => {
+      lane.classList.remove('is-open'); lane.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = ''; clearInterval(tick);
+      if (lastFocus) lastFocus.focus();
+    };
+    const openLane = (e) => {
+      lastFocus = e.currentTarget;
+      lane.classList.add('is-open'); lane.setAttribute('aria-hidden', 'false'); lane.scrollTop = 0;
+      document.body.style.overflow = 'hidden';
+      $$('.lane-art svg', lane).forEach((svg, i) => setTimeout(() => redraw(svg), 150 + i * 180));
+      let left = 30; nEl.textContent = '30'; endEl.textContent = 'The clock is only for fun. Take your time.';
+      clearInterval(tick);
+      tick = setInterval(() => {
+        left--; nEl.textContent = String(Math.max(0, left)).padStart(2, '0');
+        if (left <= 0) { clearInterval(tick); endEl.textContent = 'Thirty seconds are up. Still here? Good sign.'; }
+      }, 1000);
+      $('[data-lane-close]', lane).focus();
+    };
+    $$('[data-lane-open]').forEach((b) => b.addEventListener('click', openLane));
+    $('[data-lane-close]', lane).addEventListener('click', closeLane);
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && lane.classList.contains('is-open')) closeLane(); });
+  }
+
+  /* =====================================================================
      GAMES
      Two small games on the About page: HTTP Dino is drawn on a <canvas>,
      Memory is plain buttons.

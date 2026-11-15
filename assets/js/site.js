@@ -552,7 +552,7 @@
       const stage = document.createElement('div'); stage.className = 'reel-stage';
       const bar = document.createElement('i'); bar.className = 'reel-bar';
       const cap = document.createElement('figcaption'); cap.className = 'reel-cap';
-      cap.innerHTML = '<div><b></b><span></span></div><button type="button">Open →</button>';
+      cap.innerHTML = '<div><small class="reel-kick mono">Now showing · tap to open</small><b></b><span></span></div><button type="button">Open project →</button>';
       const dots = document.createElement('div'); dots.className = 'reel-dots';
       let at = -1, timer = 0, hold = false, visible = false;
       const plan = () => { clearTimeout(timer); if (!reduce && visible && !hold && !document.hidden) timer = setTimeout(() => show(at + 1), REEL_MS); };
@@ -587,6 +587,13 @@
       new IntersectionObserver((en) => { visible = en[0].isIntersecting; if (visible && at < 0) show(0); else plan(); }, { threshold: 0.25 }).observe(reel);
       document.addEventListener('visibilitychange', plan);
     }
+  }
+
+  /* the hop button appears once you scroll past the first screen */
+  const hop = $('.hop');
+  if (hop) {
+    const showHop = () => hop.classList.toggle('on', scrollY > innerHeight * 0.6);
+    addEventListener('scroll', showHop, { passive: true }); showHop();
   }
 
   const lane = $('[data-lane]');

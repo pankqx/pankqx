@@ -1163,3 +1163,15 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .human-btn:hover b { transform: translateX(3px); }
 a.human-btn[href^="index"]:hover b { transform: translateX(-3px); }
 @media (max-width: 520px) { .bar-r .btn-sm { display: none; } .mode .lbl { display: none; } }
+
+/* =====================================================================
+   Rev L · dark cards that match the board
+   Cards are the same near-black as the page, just lifted a step, with a
+   faint warm edge. Text inside is warm white and soft sand.
+   ===================================================================== */
+:root[data-theme='blueprint'] { --card: #15171a; --edge: rgba(235, 219, 178, 0.15); --drop: rgba(0, 0, 0, 0.75); }
+:root[data-theme='blueprint'] .band { --paper: #0d0e0f; --card: #15171a; --edge: rgba(235, 219, 178, 0.15); --drop: rgba(0, 0, 0, 0.75); }
+:root[data-theme='blueprint'] :is(.trait, .pj-art, .pj-txt, .pj-head, .cv-tab, .cv-stage, .term, .cup, .game-box, .gitlog, .tree, .flag-art, .flag-body, .build, .hello-strip, .who, .lane-card, .lane-cv, .lane-pdf, .also a) {
+  --ink: #f2ead8; --ink-2: #b9b1a1; --ink-3: #847d70;
+  background: linear-gradient(180deg, rgba(235, 219, 178, 0.035), transparent 40%), var(--card) !important;
+}

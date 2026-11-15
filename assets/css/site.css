@@ -1264,3 +1264,38 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 /* phones: give the About heading room under the top bar */
 .about-intro { padding-top: calc(var(--bar-h) + 14px) !important; }
 @media (max-width: 760px) { .about-intro > .wrap { padding-top: 34px !important; } }
+
+/* =====================================================================
+   Rev O · one type scale, one rhythm
+   Headings come down a step so they no longer shout over the cards;
+   text inside cards shares three sizes; sections share one padding.
+   ===================================================================== */
+.h2 { font-size: clamp(38px, 5.4vw, 78px); line-height: 0.95; }
+.about-h1 { font-size: clamp(44px, 6.2vw, 90px); }
+.contact-big { font-size: clamp(52px, 9.6vw, 124px); }
+.lede { font-size: clamp(16.5px, 1.35vw, 19px); line-height: 1.55; }
+.head2 { margin-bottom: clamp(28px, 4vw, 52px) !important; }
+.sh { margin-bottom: clamp(22px, 2.6vw, 32px) !important; }
+.sheet > .wrap { padding-top: clamp(44px, 6vw, 84px); padding-bottom: clamp(44px, 6vw, 84px); }
+.cover > .wrap, .about-intro > .wrap { padding-top: clamp(34px, 5vw, 72px); }
+
+/* card headings: one size family */
+.pj-quip, .flag-quote { font-size: clamp(20px, 1.7vw, 24px); line-height: 1.2; }
+.cv-tab b { font-size: clamp(18px, 1.45vw, 21px); }
+.trait h3 { font-size: clamp(21px, 1.75vw, 25px); }
+.gl-t { font-size: clamp(16.5px, 1.35vw, 19px); }
+.who p { font-size: clamp(16.5px, 1.3vw, 18.5px); }
+.build-h { font-size: clamp(24px, 2.4vw, 34px); }
+/* card body text: one size */
+.pj-txt p:not(.pj-quip), .trait p, .gl-b p, .flag-body > p:not(.flag-quote), .build-text p, .lane-t p { font-size: 15.5px; line-height: 1.6; }
+
+/* the door to the About page: smaller, calmer */
+.nextcard { padding: clamp(26px, 4.4vw, 56px) !important; gap: 14px !important; }
+.nextcard .nx-t { font-size: clamp(40px, 5.8vw, 82px); }
+.nextcard .nx-p { font-size: clamp(15.5px, 1.25vw, 18px); max-width: 46ch; }
+
+/* portrait: a size smaller */
+.portrait { width: min(100%, 320px); }
+
+/* smoother scrolling: shorter reveals, no layout shift */
+.js .rv { transition-duration: 0.6s !important; }

@@ -1230,3 +1230,10 @@ main::before, main::after { content: ''; position: absolute; top: 0; bottom: 0; 
 main::before { left: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 @media (min-width: 1400px) { main::before, main::after { width: 16px; } main::before { left: calc(50% - 660px - 22px); } main::after { right: calc(50% - 660px - 22px); } }
+
+/* summary: big close button at the end, resume button kept in the top bar on phones */
+.lane-x-big { display: flex; align-items: center; justify-content: center; width: 100%; height: 54px; margin-top: 22px; border: 1.5px solid var(--edge); background: var(--card); box-shadow: 4px 4px 0 0 var(--drop); font-size: 12px; }
+.lane-x-big:hover { background: var(--ink); color: var(--paper); }
+@media (max-width: 520px) { .bar-r .btn-sm { display: inline-flex; padding: 0 10px; } .human-btn { padding: 0 10px; } .mode { display: none; } }
+.hb-short { display: none; }
+@media (max-width: 520px) { .mode { display: inline-flex; } .mode .lbl { display: none; } .hb-long { display: none; } .hb-short { display: inline; } .bar-r { gap: 8px; } }

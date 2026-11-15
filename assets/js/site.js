@@ -624,7 +624,7 @@
       $('[data-lane-close]', lane).focus();
     };
     $$('[data-lane-open]').forEach((b) => b.addEventListener('click', openLane));
-    $('[data-lane-close]', lane).addEventListener('click', closeLane);
+    $$('[data-lane-close]', lane).forEach((b) => b.addEventListener('click', closeLane));
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && lane.classList.contains('is-open')) closeLane(); });
   }
 

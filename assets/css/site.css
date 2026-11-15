@@ -1141,3 +1141,25 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .nextcard { --ink: #1d2021; --ink-2: #3c2a1e; --ink-3: #3c2a1e; --signal: #1d2021; --signal-ink: #1d2021; background: #fe8019 !important; color: #1d2021; border: 1.5px solid #1d2021; box-shadow: 6px 6px 0 0 var(--drop); }
 .nextcard:hover { transform: translate(-2px, -2px); box-shadow: 9px 9px 0 0 var(--drop); }
 .nextcard .nx-t, .nextcard .nx-p, .nextcard .mono { color: #1d2021 !important; }
+
+/* =====================================================================
+   Rev K · cards on the grid
+   No solid column: the drawing-board grid shows everywhere outside the
+   cards. "The human part" lives in the top bar instead of a menu.
+   ===================================================================== */
+:root { --grid: rgba(29, 28, 25, 0.06); --grid-major: rgba(29, 28, 25, 0.12); }
+:root[data-theme='blueprint'] { --grid: rgba(235, 219, 178, 0.05); --grid-major: rgba(235, 219, 178, 0.1); }
+.sheet > .wrap { background: none; }
+.band { --grid: rgba(235, 219, 178, 0.05); --grid-major: rgba(235, 219, 178, 0.1);
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px), linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px; background-position: -1px -1px; }
+.hop { display: none !important; }
+
+/* the human part button in the top bar */
+.human-btn { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border: 1.5px solid var(--signal); background: var(--signal); color: var(--on-acc); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; box-shadow: 3px 3px 0 0 var(--drop); transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease); }
+.human-btn b { font-weight: 500; transition: transform 0.25s var(--ease); }
+.human-btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 0 var(--drop); }
+.human-btn:hover b { transform: translateX(3px); }
+a.human-btn[href^="index"]:hover b { transform: translateX(-3px); }
+@media (max-width: 520px) { .bar-r .btn-sm { display: none; } .mode .lbl { display: none; } }

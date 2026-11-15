@@ -1106,3 +1106,38 @@ body { background-image: linear-gradient(var(--grid-major) 1px, transparent 1px)
 .lane-mail { margin: 16px 0 0; color: var(--ink-3); }
 @media (min-width: 860px) { .lane-cvs { grid-template-columns: repeat(3, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .btn::after, .hop { transition: none; } }
+
+/* =====================================================================
+   Rev J · cards on a board
+   The framed column is a solid panel. Every piece of content inside is a
+   filled card with a firm edge and a hard shadow, so it sits on the board.
+   ===================================================================== */
+:root { --col: #d9d4c6; --card: #ece8de; --edge: rgba(29, 28, 25, 0.32); --drop: rgba(29, 28, 25, 0.2); }
+:root[data-theme='blueprint'] { --col: #121415; --card: #1b1e1f; --edge: rgba(235, 219, 178, 0.24); --drop: #000; }
+.band { --col: #181a1b; --card: #232627; --edge: rgba(235, 219, 178, 0.24); --drop: #000; }
+.sheet > .wrap { background: var(--col); }
+.cover > .wrap { padding-bottom: clamp(48px, 7vw, 96px); }
+
+.trait, .trait.trait-a, .pj-art, .pj-txt, .pj-head, .cv-tab, .cv-stage, .term, .cup, .game-box, .gitlog, .tree, .flag-art, .flag-body, .build, .circuit .steps, .hello-strip, .who, .lane-card, .lane-cv, .lane-pdf, .also a {
+  background: var(--card) !important;
+  border: 1.5px solid var(--edge) !important;
+  box-shadow: 5px 5px 0 0 var(--drop);
+  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.25s, background-color 0.25s;
+}
+.pj-head, .cv-tab, .also a, .lane-pdf { box-shadow: 3px 3px 0 0 var(--drop); }
+.trait:hover, .pj-head:hover, .cv-tab:hover, .lane-card:hover, .lane-pdf:hover, .also a:hover, .hello-strip:hover, .cup:hover {
+  transform: translate(-2px, -2px); box-shadow: 7px 7px 0 0 var(--drop); border-color: var(--signal) !important;
+}
+.pj-head[aria-expanded='true'], .cv-tab[aria-selected='true'] { border-color: var(--signal) !important; box-shadow: 4px 4px 0 0 var(--signal); }
+.pj-txt, .flag-body, .gitlog, .tree, .build, .hello-strip, .who { padding: clamp(18px, 2.6vw, 30px) !important; }
+.pj-txt { margin-top: 14px; }
+.pj-head .t { color: var(--ink-2); }
+.cup { padding: 14px 18px !important; }
+.also a:hover { color: var(--on-acc); background: var(--blue) !important; border-color: var(--blue) !important; }
+.hello-strip { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: baseline; margin-top: 18px; }
+.hello-strip i { display: none; }
+
+/* the door to the About page: always orange with dark text, in both themes */
+.nextcard { --ink: #1d2021; --ink-2: #3c2a1e; --ink-3: #3c2a1e; --signal: #1d2021; --signal-ink: #1d2021; background: #fe8019 !important; color: #1d2021; border: 1.5px solid #1d2021; box-shadow: 6px 6px 0 0 var(--drop); }
+.nextcard:hover { transform: translate(-2px, -2px); box-shadow: 9px 9px 0 0 var(--drop); }
+.nextcard .nx-t, .nextcard .nx-p, .nextcard .mono { color: #1d2021 !important; }

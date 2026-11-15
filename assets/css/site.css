@@ -1175,3 +1175,40 @@ a.human-btn[href^="index"]:hover b { transform: translateX(-3px); }
   --ink: #f2ead8; --ink-2: #b9b1a1; --ink-3: #847d70;
   background: linear-gradient(180deg, rgba(235, 219, 178, 0.035), transparent 40%), var(--card) !important;
 }
+
+/* =====================================================================
+   Rev M · sections in boxes, and a portrait
+   Each section is its own framed box on the grid, with orange corner
+   marks. The About page has an ASCII portrait that turns into a photo.
+   ===================================================================== */
+.sheet { border-top: 0 !important; padding: clamp(10px, 1.4vw, 18px) 0 !important; background: none; }
+.cover { padding-top: calc(var(--bar-h) + 12px) !important; }
+.band { background: none !important; }
+.sheet > .wrap { width: calc(100% - 24px); border: 1.5px solid var(--edge); background: color-mix(in srgb, var(--paper) 80%, transparent) !important; }
+.band > .wrap { background: color-mix(in srgb, var(--paper) 92%, transparent) !important; }
+.cover > .wrap, .about-intro > .wrap { padding-top: clamp(36px, 6vw, 80px); }
+.sheet > .wrap::before, .sheet > .wrap::after { content: ''; position: absolute; top: auto; bottom: auto; right: auto; left: auto; width: 10px; height: 10px; background: var(--signal); }
+.sheet > .wrap::before { top: -6px; left: -6px; }
+.sheet > .wrap::after { bottom: -6px; right: -6px; }
+.sheet > .wrap { box-shadow: 6px 6px 0 0 var(--drop); }
+.foot { padding-left: 12px; padding-right: 12px; }
+
+/* portrait */
+.ai-side { display: grid; gap: clamp(22px, 3vw, 34px); align-content: start; }
+.portrait { margin: 0; }
+.portrait .pt-bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; background: #15171a; color: #b9b1a1; border: 1.5px solid var(--edge); border-bottom: 0; font-size: 11px; }
+.pt-tabs { display: flex; gap: 4px; }
+.pt-tabs button { height: 28px; padding: 0 10px; border: 1px solid rgba(235, 219, 178, 0.2); color: #b9b1a1; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; transition: background-color 0.2s, color 0.2s, border-color 0.2s; }
+.pt-tabs button:hover { border-color: #fe8019; color: #f2ead8; }
+.pt-tabs button[aria-selected='true'] { background: #fe8019; border-color: #fe8019; color: #1d2021; }
+.pt-screen { position: relative; aspect-ratio: 640 / 717; overflow: hidden; border: 1.5px solid var(--edge); box-shadow: 5px 5px 0 0 var(--drop);
+  background-color: #0d0e0f;
+  background-image: linear-gradient(rgba(235,219,178,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(235,219,178,.08) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: -1px -1px; }
+.pt-ascii { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; font-family: var(--f-mono); font-size: clamp(4.2px, 0.62vw, 9.2px); line-height: 1.08; letter-spacing: 0.02em; color: #f2ead8; white-space: pre; transition: opacity 0.5s; }
+.pt-ascii .hot { color: #fe8019; }
+.pt-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: bottom; opacity: 0; transform: scale(1.03); filter: grayscale(1) contrast(1.06); transition: opacity 0.6s var(--ease), transform 0.9s var(--ease); }
+.portrait[data-mode='formal'] .pt-img[data-pt-img='formal'], .portrait[data-mode='casual'] .pt-img[data-pt-img='casual'] { opacity: 1; transform: none; }
+.portrait:not([data-mode='ascii']) .pt-ascii { opacity: 0; }
+.pt-screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+@media (max-width: 999px) { .pt-ascii { font-size: clamp(3.4px, 1.62vw, 8.4px); } }

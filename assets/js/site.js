@@ -635,33 +635,66 @@
      ===================================================================== */
   const portrait = $('[data-portrait]');
   if (portrait) {
-    const pre = $('[data-pt-ascii]', portrait);
-    const art = pre.textContent;
-    const NOISE = '.:-=+*#%@01';
-    let run = 0;
-    portrait.dataset.mode = 'ascii';
-    const assemble = () => {
-      const id = ++run;
-      if (reduce) { pre.textContent = art; return; }
-      const chars = [...art], when = chars.map((ch, i) => (/\s/.test(ch) ? 0 : Math.random() * 0.75 + (i / chars.length) * 0.25));
-      const t0 = performance.now(), dur = 1500;
-      const step = (now) => {
-        if (id !== run) return;
-        const p = Math.min(1, (now - t0) / dur);
-        let s = '';
-        for (let i = 0; i < chars.length; i++) s += p >= when[i] ? chars[i] : NOISE[(Math.random() * NOISE.length) | 0];
-        pre.textContent = s;
-        if (p < 1) requestAnimationFrame(step);
-      };
-      requestAnimationFrame(step);
+    const screen = $('[data-pt-screen]', portrait), img = $('.pt-img', portrait), cv = $('.pt-plasma', portrait), hint = $('[data-pt-hint]', portrait);
+    const ctx = cv.getContext('2d');
+    const W = 120, H = Math.round(120 * img.height / img.width);   // low-res on purpose: the pixels are part of the look
+    cv.width = W; cv.height = H;
+    let mask = null, dissolve = null, revealed = false, raf = 0, seen = false, t0 = performance.now();
+    const pal = [[13, 14, 15], [60, 22, 8], [180, 60, 10], [254, 128, 25], [250, 189, 47], [235, 219, 178], [142, 192, 124]];
+    const colour = (v) => {                        // v 0..1 -> a colour along the palette
+      const x = Math.max(0, Math.min(0.999, v)) * (pal.length - 1), i = x | 0, f = x - i, a = pal[i], b = pal[i + 1];
+      return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
     };
-    pre.textContent = art.replace(/\S/g, ' ');
-    new IntersectionObserver((en, ob) => { if (en[0].isIntersecting) { assemble(); ob.disconnect(); } }, { threshold: 0.3 }).observe(portrait);
-    $$('[data-pt]', portrait).forEach((b) => b.addEventListener('click', () => {
-      $$('[data-pt]', portrait).forEach((x) => x.setAttribute('aria-selected', String(x === b)));
-      portrait.dataset.mode = b.dataset.pt;
-      if (b.dataset.pt === 'ascii') assemble();
-    }));
+    const buildMask = () => {                      // where the drawing has ink, the plasma glows
+      const off = document.createElement('canvas'); off.width = W; off.height = H;
+      const o = off.getContext('2d'); o.fillStyle = '#fff'; o.fillRect(0, 0, W, H); o.drawImage(img, 0, 0, W, H);
+      const d = o.getImageData(0, 0, W, H).data;
+      mask = new Float32Array(W * H);
+      for (let i = 0; i < W * H; i++) mask[i] = Math.min(1, Math.pow(1 - d[i * 4] / 255, 0.7) * 1.6);
+      dissolve = new Float32Array(W * H).map(() => Math.random());
+    };
+    const frame = new ImageData(W, H);
+    let burn = -1;                                 // -1 = plasma showing, 0..1 = burning away
+    const draw = (now) => {
+      const t = (now - t0) / 1000, px = frame.data;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const i = y * W + x, k = i * 4;
+        const v = Math.sin(x * 0.09 + t * 1.3) + Math.sin(y * 0.07 - t * 1.1) + Math.sin((x + y) * 0.05 + t * 0.7) + Math.sin(Math.hypot(x - W / 2, y - H / 2) * 0.11 - t * 2.1);
+        const m = mask[i] * (0.88 + 0.12 * Math.sin(t * 2.2 + y * 0.04));
+        const [r, g, b] = colour((v + 4) / 8 * 0.85 + m * 0.25);
+        let a = 255;
+        if (burn >= 0) { const edge = burn * 1.25 - dissolve[i]; if (edge > 0.12) a = 0; else if (edge > 0) a = 255 * (1 - edge / 0.12); }
+        const glow = burn >= 0 && a > 0 && a < 255;
+        px[k] = glow ? 254 : r * (0.18 + m * 0.82); px[k + 1] = glow ? 160 : g * (0.18 + m * 0.82); px[k + 2] = glow ? 40 : b * (0.18 + m * 0.82); px[k + 3] = a;
+      }
+      ctx.putImageData(frame, 0, 0);
+    };
+    const loop = (now) => {
+      raf = 0;
+      if (!seen || document.hidden || revealed && burn < 0) return;
+      if (burn >= 0) { burn = Math.min(1, burn + 0.022); if (burn >= 1) { revealed = true; burn = -1; cv.style.opacity = '0'; return; } }
+      draw(now); raf = requestAnimationFrame(loop);
+    };
+    const kick = () => { if (!raf && seen) raf = requestAnimationFrame(loop); };
+    const reveal = () => {
+      portrait.classList.remove('is-shaking'); void portrait.offsetWidth; portrait.classList.add('is-shaking');
+      if (!revealed) {
+        burn = 0; hint.textContent = 'there he is';
+        try { if (navigator.vibrate) navigator.vibrate([20, 40, 20]); } catch (e) { /* no haptics */ }
+      } else {                                     // double-tap again: back under the plasma
+        revealed = false; cv.style.opacity = '1'; hint.textContent = 'double-tap to reveal';
+      }
+      kick();
+    };
+    const start = () => { buildMask(); draw(performance.now()); new IntersectionObserver((en) => { seen = en[0].isIntersecting; kick(); }, { threshold: 0.15 }).observe(screen); document.addEventListener('visibilitychange', kick); };
+    if (img.complete && img.naturalWidth) start(); else img.addEventListener('load', start, { once: true });
+    // double-tap on phones and double-click on laptops, counted by hand so both behave the same
+    let lastTap = 0;
+    screen.addEventListener('pointerup', (e) => { if (e.button) return; const now = performance.now(); if (now - lastTap < 380) { lastTap = 0; reveal(); } else lastTap = now; });
+    screen.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); reveal(); } });
+    screen.addEventListener('animationend', () => portrait.classList.remove('is-shaking'));
+    portrait.addEventListener('animationend', () => portrait.classList.remove('is-shaking'));
+    if (reduce) { revealed = true; cv.style.opacity = '0'; hint.textContent = 'portrait'; }
   }
 
   /* =====================================================================

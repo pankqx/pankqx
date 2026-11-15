@@ -1237,3 +1237,30 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 @media (max-width: 520px) { .bar-r .btn-sm { display: inline-flex; padding: 0 10px; } .human-btn { padding: 0 10px; } .mode { display: none; } }
 .hb-short { display: none; }
 @media (max-width: 520px) { .mode { display: inline-flex; } .mode .lbl { display: none; } .hb-long { display: none; } .hb-short { display: inline; } .bar-r { gap: 8px; } }
+
+/* =====================================================================
+   Rev N · plasma portrait
+   The drawing is hidden under a moving plasma in the shape of the face.
+   Double-tap: it shakes, the plasma burns away, the drawing shows.
+   ===================================================================== */
+.pt-bar .pt-hint { color: #fe8019; }
+.pt-screen { display: block; width: 100%; padding: 0; cursor: pointer; aspect-ratio: 693 / 760; background-color: #f4f1ea !important; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+.pt-screen::after { display: none; }
+.pt-img { opacity: 1 !important; transform: none !important; object-fit: contain; filter: grayscale(1) contrast(1.04); }
+.pt-plasma { position: absolute; inset: 0; width: 100%; height: 100%; background: #0d0e0f; image-rendering: pixelated; transition: opacity 0.4s; }
+.portrait.is-shaking .pt-screen { animation: pt-shake 0.55s cubic-bezier(.36,.07,.19,.97) both; }
+@keyframes pt-shake {
+  10%, 90% { transform: translate(-1px, 1px) rotate(-0.4deg); }
+  20%, 80% { transform: translate(3px, -2px) rotate(0.6deg); }
+  30%, 50%, 70% { transform: translate(-5px, 2px) rotate(-0.8deg); }
+  40%, 60% { transform: translate(5px, -1px) rotate(0.8deg); }
+}
+@media (prefers-reduced-motion: reduce) { .portrait.is-shaking .pt-screen { animation: none; } }
+
+/* coffee now lives under the contact links */
+.cup-row { margin-top: clamp(26px, 4vw, 40px); }
+.cup-row .cup { display: inline-flex; }
+
+/* phones: give the About heading room under the top bar */
+.about-intro { padding-top: calc(var(--bar-h) + 14px) !important; }
+@media (max-width: 760px) { .about-intro > .wrap { padding-top: 34px !important; } }

@@ -636,34 +636,31 @@
   const portrait = $('[data-portrait]');
   if (portrait) {
     const pre = $('[data-pt-ascii]', portrait);
-    const art = { formal: pre.textContent, casual: $('[data-pt-casual-ascii]', portrait).innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#x27;/g, "'").replace(/&amp;/g, '&') };
+    const art = pre.textContent;
     const NOISE = '.:-=+*#%@01';
-    let current = 'formal', run = 0;
+    let run = 0;
     portrait.dataset.mode = 'ascii';
-    const assemble = (text) => {
+    const assemble = () => {
       const id = ++run;
-      if (reduce) { pre.textContent = text; return; }
-      const chars = [...text], when = chars.map((ch, i) => (ch === ' ' || ch === '\n') ? 0 : Math.random() * 0.75 + (i / chars.length) * 0.25);
+      if (reduce) { pre.textContent = art; return; }
+      const chars = [...art], when = chars.map((ch, i) => (/\s/.test(ch) ? 0 : Math.random() * 0.75 + (i / chars.length) * 0.25));
       const t0 = performance.now(), dur = 1500;
       const step = (now) => {
         if (id !== run) return;
         const p = Math.min(1, (now - t0) / dur);
         let s = '';
-        for (let i = 0; i < chars.length; i++) s += p >= when[i] || chars[i] === ' ' || chars[i] === '\n' ? chars[i] : NOISE[(Math.random() * NOISE.length) | 0];
+        for (let i = 0; i < chars.length; i++) s += p >= when[i] ? chars[i] : NOISE[(Math.random() * NOISE.length) | 0];
         pre.textContent = s;
         if (p < 1) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
     };
-    pre.textContent = art.formal.replace(/[^\s]/g, ' ');
-    new IntersectionObserver((en, ob) => { if (en[0].isIntersecting) { assemble(art[current]); ob.disconnect(); } }, { threshold: 0.3 }).observe(portrait);
+    pre.textContent = art.replace(/\S/g, ' ');
+    new IntersectionObserver((en, ob) => { if (en[0].isIntersecting) { assemble(); ob.disconnect(); } }, { threshold: 0.3 }).observe(portrait);
     $$('[data-pt]', portrait).forEach((b) => b.addEventListener('click', () => {
-      const mode = b.dataset.pt;
       $$('[data-pt]', portrait).forEach((x) => x.setAttribute('aria-selected', String(x === b)));
-      if (mode === 'ascii') {
-        current = current === 'formal' ? 'casual' : 'formal';   // each visit to ASCII shows the other outfit
-        portrait.dataset.mode = 'ascii'; assemble(art[current]);
-      } else { portrait.dataset.mode = mode; current = mode; }
+      portrait.dataset.mode = b.dataset.pt;
+      if (b.dataset.pt === 'ascii') assemble();
     }));
   }
 

@@ -1212,3 +1212,21 @@ a.human-btn[href^="index"]:hover b { transform: translateX(-3px); }
 .portrait:not([data-mode='ascii']) .pt-ascii { opacity: 0; }
 .pt-screen::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
 @media (max-width: 999px) { .pt-ascii { font-size: clamp(3.4px, 1.62vw, 8.4px); } }
+
+/* portrait: smaller, ascii + sketch only */
+.portrait { width: min(100%, 380px); justify-self: center; }
+.pt-screen { aspect-ratio: 1200 / 1312; }
+.pt-ascii { font-size: clamp(3.2px, 0.43vw, 6.2px); }
+@media (max-width: 999px) { .pt-ascii { font-size: clamp(3.2px, 1.2vw, 6.4px); } }
+.portrait[data-mode='sketch'] .pt-img[data-pt-img='sketch'] { opacity: 1; transform: none; }
+.pt-img[data-pt-img='sketch'] { object-fit: cover; object-position: center top; filter: grayscale(1) contrast(1.05); background: #f4f1ea; }
+.portrait[data-mode='sketch'] .pt-screen::after { opacity: 0; }
+
+/* plint-style hatched edges down both sides of the page */
+main { position: relative; }
+main::before, main::after { content: ''; position: absolute; top: 0; bottom: 0; z-index: 0; width: 12px; pointer-events: none;
+  border-left: 1px solid var(--edge); border-right: 1px solid var(--edge);
+  background: repeating-linear-gradient(45deg, var(--hatch) 0 1px, transparent 1px 6px); }
+main::before { left: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
+main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
+@media (min-width: 1400px) { main::before, main::after { width: 16px; } main::before { left: calc(50% - 660px - 22px); } main::after { right: calc(50% - 660px - 22px); } }

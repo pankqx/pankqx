@@ -1299,3 +1299,80 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 
 /* smoother scrolling: shorter reveals, no layout shift */
 .js .rv { transition-duration: 0.6s !important; }
+
+/* =====================================================================
+   Rev P · room to breathe
+   Sections keep their frame and the hatched sides, but the inside is
+   calm: a solid page colour, flat cards with hairline borders, one
+   accent (orange), more space, smaller display type.
+   ===================================================================== */
+:root { --grid: rgba(29, 28, 25, 0.045); --grid-major: rgba(29, 28, 25, 0.085); --card: #ebe7dd; --edge: rgba(29, 28, 25, 0.16); }
+:root[data-theme='blueprint'] { --grid: rgba(235, 219, 178, 0.035); --grid-major: rgba(235, 219, 178, 0.07); --card: #131517; --edge: rgba(235, 219, 178, 0.12); }
+.band { --card: #131517; --edge: rgba(235, 219, 178, 0.12); }
+
+/* section frames: thin, flat, solid inside */
+.sheet > .wrap { border: 1px solid var(--edge); box-shadow: none; background: var(--paper) !important; padding-top: clamp(52px, 7vw, 104px); padding-bottom: clamp(52px, 7vw, 104px); }
+.sheet > .wrap::before, .sheet > .wrap::after { display: none; }
+.sheet { padding: clamp(8px, 1vw, 14px) 0 !important; }
+
+/* cards: flat, hairline, more padding, no hover jumps */
+.trait, .trait.trait-a, .pj-art, .pj-txt, .pj-head, .cv-tab, .cv-stage, .term, .game-box, .gitlog, .tree, .flag-art, .flag-body, .build, .hello-strip, .who, .lane-card, .lane-cv, .lane-pdf, .also a, .breathe .br-stage {
+  box-shadow: none !important; border: 1px solid var(--edge) !important; background: var(--card) !important;
+}
+:root[data-theme='blueprint'] :is(.trait, .pj-art, .pj-txt, .pj-head, .cv-tab, .cv-stage, .term, .game-box, .gitlog, .tree, .flag-art, .flag-body, .build, .hello-strip, .who, .lane-card, .lane-cv, .lane-pdf, .also a) { background: var(--card) !important; }
+.trait:hover, .pj-head:hover, .cv-tab:hover, .lane-card:hover, .lane-pdf:hover, .also a:hover, .hello-strip:hover { transform: none; box-shadow: none !important; border-color: var(--signal) !important; }
+.pj-head[aria-expanded='true'], .cv-tab[aria-selected='true'] { box-shadow: inset 3px 0 0 var(--signal) !important; border-color: var(--edge) !important; }
+.pt-screen { box-shadow: none !important; border: 1px solid var(--edge) !important; }
+.traits { gap: clamp(14px, 1.8vw, 22px) !important; }
+.trait, .trait.trait-a { padding: clamp(22px, 2.6vw, 32px) !important; }
+.pj-head { margin-bottom: 10px; }
+
+/* one accent: orange. everything else is ink */
+.h2 .serif, .statement .serif, .flag-quote, .gw-t, .lane h2 .serif, .contact-big .serif, .build-h .serif { color: var(--signal-ink) !important; }
+.sh-no { background: none !important; color: var(--signal-ink) !important; padding: 0 !important; }
+.sh { border-bottom: 0 !important; padding-bottom: 0 !important; }
+.sh-label { color: var(--ink-3) !important; }
+.pj-head .k, .lane-t small, .pj-head[aria-expanded='true'] .k, .reel-kick { color: var(--ink-3) !important; }
+.pj-badge { color: var(--ink-3) !important; }
+.cover-sub a, .also a, .hello-strip a, .lane-mail a, .tour, .text a, .pj-foot a { color: var(--ink) !important; border-bottom-color: var(--signal) !important; }
+.cover-sub a:hover, .hello-strip a:hover, .lane-mail a:hover, .tour:hover { background: none !important; color: var(--signal-ink) !important; }
+.also a { color: var(--ink-2) !important; border-color: var(--edge) !important; }
+
+/* display type: a step smaller again */
+.h2 { font-size: clamp(36px, 4.8vw, 68px); }
+.about-h1 { font-size: clamp(42px, 5.6vw, 80px); }
+.contact-big { font-size: clamp(48px, 8vw, 104px); }
+.flag-title { font-size: clamp(48px, 6.4vw, 92px) !important; }
+.nextcard .nx-t { font-size: clamp(38px, 5vw, 72px); }
+
+/* ProntoPy: simpler, no boxes around the numbers */
+.flag-body { padding: clamp(24px, 3vw, 40px) !important; }
+.flag-body > p:not(.flag-quote) { max-width: 52ch; }
+.specs { display: flex !important; flex-wrap: wrap; gap: 8px 28px !important; margin: 22px 0 28px !important; }
+.specs div { border: 0 !important; padding: 0 !important; background: none !important; display: flex; align-items: baseline; gap: 8px; }
+.specs b { font-size: 22px !important; }
+.specs span { font-size: 12px; }
+.flag-cta .mono.muted { display: none; }
+
+/* play section */
+.play-grid { display: grid; gap: clamp(14px, 2vw, 24px); }
+@media (min-width: 900px) { .play-grid { grid-template-columns: 1.5fr 1fr; align-items: start; } }
+.breathe { margin: 0; }
+.breathe .game-bar { padding: 14px 16px; border: 1px solid var(--edge); border-bottom: 0; background: var(--card); color: var(--ink-3); }
+.br-stage { position: relative; display: grid; place-items: center; width: 100%; aspect-ratio: 1 / 0.86; padding: 0; cursor: pointer; overflow: hidden; }
+.br-box { position: absolute; top: 50%; left: 50%; width: 40%; aspect-ratio: 1; border: 1.5px solid var(--ink-3); transform: translate(-50%, -66%) scale(0.62); transition: transform 4s cubic-bezier(.45, 0, .55, 1), border-color 0.6s; }
+.br-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--signal); top: 100%; left: 0; }
+.breathe.is-on .br-box { border-color: var(--signal); }
+.breathe[data-phase='in'] .br-box, .breathe[data-phase='hold-in'] .br-box { transform: translate(-50%, -66%) scale(1); }
+.breathe[data-phase='out'] .br-box, .breathe[data-phase='hold-out'] .br-box { transform: translate(-50%, -66%) scale(0.62); }
+.breathe[data-phase='in'] .br-dot { animation: br-left 4s linear forwards; }
+.breathe[data-phase='hold-in'] .br-dot { animation: br-top 4s linear forwards; }
+.breathe[data-phase='out'] .br-dot { animation: br-right 4s linear forwards; }
+.breathe[data-phase='hold-out'] .br-dot { animation: br-bottom 4s linear forwards; }
+@keyframes br-left { from { top: 100%; left: 0; } to { top: 0; left: 0; } }
+@keyframes br-top { from { top: 0; left: 0; } to { top: 0; left: 100%; } }
+@keyframes br-right { from { top: 0; left: 100%; } to { top: 100%; left: 100%; } }
+@keyframes br-bottom { from { top: 100%; left: 100%; } to { top: 100%; left: 0; } }
+.br-word { position: absolute; left: 0; right: 0; bottom: 16%; text-align: center; font-size: clamp(20px, 2vw, 26px); font-weight: 700; font-stretch: 92%; color: var(--ink); }
+.br-sec { position: absolute; left: 0; right: 0; bottom: 9%; text-align: center; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+@media (prefers-reduced-motion: reduce) { .br-box { transition: none; } .breathe .br-dot { animation: none !important; } }

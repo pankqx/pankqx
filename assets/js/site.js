@@ -698,6 +698,41 @@
   }
 
   /* =====================================================================
+     BREATHE
+     One minute of box breathing: in 4, hold 4, out 4, hold 4, four rounds.
+     The square grows and shrinks, a dot walks its edge.
+     ===================================================================== */
+  const br = $('[data-breathe]');
+  if (br) {
+    const stage = $('[data-br-start]', br), word = $('[data-br-word]', br), sec = $('[data-br-sec]', br), round = $('[data-br-round]', br);
+    const STEPS = [['Breathe in', 'in'], ['Hold', 'hold-in'], ['Breathe out', 'out'], ['Hold', 'hold-out']];
+    const SIDE = 4, ROUNDS = 4;
+    let timer = 0, running = false;
+    const stop = (msg) => {
+      clearInterval(timer); running = false; br.removeAttribute('data-phase'); br.classList.remove('is-on');
+      word.textContent = msg || 'Tap to start'; sec.textContent = msg ? 'tap to go again' : 'one minute';
+      round.textContent = 'box breathing · 4-4-4-4';
+    };
+    const start = () => {
+      running = true; br.classList.add('is-on');
+      let tick = 0;
+      const show = () => {
+        const total = SIDE * 4 * ROUNDS;
+        if (tick >= total) { stop('Nice. Back to work?'); return; }
+        const step = Math.floor(tick / SIDE) % 4, left = SIDE - (tick % SIDE);
+        br.setAttribute('data-phase', STEPS[step][1]);
+        word.textContent = STEPS[step][0];
+        sec.textContent = String(left);
+        round.textContent = 'round ' + (Math.floor(tick / (SIDE * 4)) + 1) + ' of ' + ROUNDS;
+        tick++;
+      };
+      show(); timer = setInterval(show, 1000);
+    };
+    stage.addEventListener('click', () => (running ? stop() : start()));
+    new IntersectionObserver((en) => { if (!en[0].isIntersecting && running) stop(); }).observe(br);
+  }
+
+  /* =====================================================================
      GAMES
      Two small games on the About page: HTTP Dino is drawn on a <canvas>,
      Memory is plain buttons.

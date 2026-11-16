@@ -20,7 +20,7 @@
 <link rel="preload" href="assets/fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css?v=__V__">
-<script>(function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('ksp-theme2')||'blueprint';d.setAttribute('data-theme',t);if(sessionStorage.getItem('ksp-wipe')){d.classList.add('wipe-in');sessionStorage.removeItem('ksp-wipe');}}catch(e){}})();</script>
+<script>(function(){var d=document.documentElement;d.classList.add('js');try{var m=matchMedia('(prefers-color-scheme: dark)'),pick=function(){return sessionStorage.getItem('ksp-theme-visit')||(m.matches?'blueprint':'vellum');};d.setAttribute('data-theme',pick());if(m.addEventListener)m.addEventListener('change',function(){if(!sessionStorage.getItem('ksp-theme-visit'))d.setAttribute('data-theme',pick());});if(sessionStorage.getItem('ksp-wipe')){d.classList.add('wipe-in');sessionStorage.removeItem('ksp-wipe');}}catch(e){}})();</script>
 </head>
 <body class="pg-home">
 <a class="skip" href="#main">Skip to content</a>

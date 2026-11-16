@@ -89,7 +89,7 @@
   syncTheme();
   if (modeBtn) modeBtn.addEventListener('click', () => {
     const next = doc.getAttribute('data-theme') === 'blueprint' ? 'vellum' : 'blueprint';
-    const apply = () => { doc.setAttribute('data-theme', next); store.set('ksp-theme2', next); syncTheme(); };
+    const apply = () => { doc.setAttribute('data-theme', next); sessionStorage.setItem('ksp-theme-visit', next); syncTheme(); };
     if (!document.startViewTransition || reduce) { apply(); return; }
     const r = modeBtn.getBoundingClientRect();
     const x = r.left + r.width / 2, y = r.top + r.height / 2;

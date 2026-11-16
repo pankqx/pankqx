@@ -1380,3 +1380,20 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 /* room between the top bar and the first heading */
 .cover, .about-intro { padding-top: calc(var(--bar-h) + 18px) !important; }
 .cover > .wrap, .about-intro > .wrap { padding-top: clamp(40px, 5vw, 72px) !important; }
+
+/* =====================================================================
+   Rev Q · one project, one box
+   Drawing and text share a single framed box. On phones the project
+   name joins them, so an open project reads as one card.
+   ===================================================================== */
+.pj-body { border: 1px solid var(--edge); background: var(--card); }
+.pj-body .pj-art, .pj-body .pj-txt { border: 0 !important; background: none !important; margin: 0 !important; }
+.pj-body .pj-art { border-bottom: 1px solid var(--edge) !important; }
+.pj-body .pj-txt { padding: clamp(20px, 2.6vw, 30px) !important; }
+@media (max-width: 999px) {
+  .pj { display: block; border: 1px solid var(--edge); background: var(--card); margin-bottom: 12px; }
+  .pj .pj-head { border: 0 !important; background: none !important; margin: 0 !important; }
+  .pj .pj-body { border: 0; border-top: 1px solid var(--edge) !important; background: none; margin: 0; }
+  .pj:has(.pj-head[aria-expanded='true']) { border-color: var(--signal); }
+  .pj .pj-head[aria-expanded='true'] { box-shadow: none !important; }
+}

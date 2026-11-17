@@ -1,7 +1,7 @@
 # K S Pankaj
 
 **I turn ideas into products people actually use.**
-AI full-stack engineer · MCA ’27, St Aloysius · Founder of [ProntoPy.com](https://python-dsa-sigma.vercel.app/)
+AI full-stack engineer · MCA ’27, St Aloysius · Built [ProntoPy.com](https://python-dsa-sigma.vercel.app/)
 
 **Portfolio and resumes → [pankqx.github.io/pankqx](https://pankqx.github.io/pankqx/)**
 

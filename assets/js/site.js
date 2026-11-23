@@ -327,7 +327,7 @@
   const NOISE = '.:-=+*#%@/\\|<>[]{}01';
   const pickCh = (set) => set[(Math.random() * set.length) | 0];
 
-  /* ---------- page wipe between Home and About ---------- */
+  /* ---------- page wipe between pages (Home, About, Play, Contact, Blog) ---------- */
   const wipe = $('.wipe');
   const wipeGrid = () => {
     const lh = 15, cw = 13 * 0.6;
@@ -378,7 +378,7 @@
     };
     requestAnimationFrame(step);
   };
-  const isSheet = (u) => /\/(index\.html|about\.html)?$/.test(u.pathname);
+  const isSheet = (u) => /\/([\w-]+\.html)?$/.test(u.pathname);
   const norm = (pth) => pth.replace(/index\.html$/, '');
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
@@ -958,12 +958,12 @@
   const gMem = $('[data-game="memory"]');
   if (gMem) {
     const box = $('.game-box', gMem), cardsEl = $('[data-cards]', gMem), msg = $('[data-msg]', gMem), movesEl = $('[data-score]', gMem), bestEl = $('[data-best]', gMem);
-    const PAIRS = [['react', '<o>'], ['python', '>>>'], ['kotlin', 'K>'], ['git', 'o-o'], ['docker', '[=]'], ['esp32', '|#|']];
+    const PAIRS = [['coffee', 'c[_]'], ['python', '>>>'], ['react', '<o>'], ['git', 'o-o'], ['chess', '♞'], ['cricket', '/o'], ['music', '♪♫'], ['sun', '\\o/']];
     let open = [], moves = 0, found = 0, lock = false, best = parseInt(store.get('ksp-mem-best') || '0', 10) || 0;
     if (best) bestEl.textContent = pad2(best);
     const setup = () => {
       cardsEl.innerHTML = ''; open = []; moves = 0; found = 0; lock = false; movesEl.textContent = '00';
-      msg.textContent = 'Flip two cards at a time. Find all six pairs.';
+      msg.textContent = 'Flip two cards at a time. Find all eight pairs.';
       shuffle(PAIRS.flatMap((p) => [p, p])).forEach(([name, icon]) => {
         const b = document.createElement('button');
         b.type = 'button'; b.className = 'card'; b.dataset.name = name;
@@ -990,7 +990,7 @@
         if (found === PAIRS.length) {
           const rec = !best || moves < best;
           if (rec) { best = moves; store.set('ksp-mem-best', String(moves)); bestEl.textContent = pad2(moves); }
-          winCard(box, `All matched in ${moves} moves`, (moves <= 8 ? 'Sharp memory.' : 'My toolbox, now yours.') + (rec ? ' New best!' : ''), setup);
+          winCard(box, `All matched in ${moves} moves`, (moves <= 8 ? 'Sharp memory.' : 'Nice and calm.') + (rec ? ' New best!' : ''), setup);
         }
       } else {
         lock = true;
@@ -998,6 +998,109 @@
       }
     };
     setup();
+  }
+
+
+  /* ---------- Play page: sound switch (off by default) ---------- */
+  let soundOn = store.get('ksp-sound') === '1';
+  let actx = null;
+  const tone = (freq, ms, type = 'sine', vol = 0.08) => {
+    if (!soundOn) return;
+    try {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+      o.type = type; o.frequency.setValueAtTime(freq, t); o.frequency.exponentialRampToValueAtTime(freq * 0.5, t + ms / 1000);
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+      o.connect(g).connect(actx.destination); o.start(t); o.stop(t + ms / 1000);
+    } catch (e) { /* no audio */ }
+  };
+  const sBtn = $('[data-sound]');
+  if (sBtn) {
+    const paint = () => { sBtn.textContent = 'Sound: ' + (soundOn ? 'on' : 'off'); sBtn.setAttribute('aria-pressed', String(soundOn)); };
+    paint();
+    sBtn.addEventListener('click', () => { soundOn = !soundOn; store.set('ksp-sound', soundOn ? '1' : '0'); paint(); tone(660, 120); });
+  }
+
+  /* ---------- 3 · Bubble wrap: tap to pop ---------- */
+  const gBub = $('[data-game="bubbles"]');
+  if (gBub) {
+    const grid = $('[data-bubbles]', gBub), out = $('[data-score]', gBub);
+    let total = parseInt(store.get('ksp-pops') || '0', 10) || 0;
+    out.textContent = pad4(total);
+    const sheet = () => {
+      grid.innerHTML = '';
+      for (let k = 0; k < 35; k++) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'bub'; b.setAttribute('aria-label', 'Bubble');
+        grid.appendChild(b);
+      }
+    };
+    grid.addEventListener('pointerdown', (e) => {
+      const b = e.target.closest('.bub');
+      if (!b || b.classList.contains('pop')) return;
+      b.classList.add('pop'); b.setAttribute('aria-label', 'Popped');
+      buzz(8); tone(380 + Math.random() * 260, 90, 'triangle', 0.12);
+      total++; out.textContent = pad4(total); store.set('ksp-pops', String(total));
+      if (!$('.bub:not(.pop)', grid)) setTimeout(() => { grid.classList.add('fresh'); sheet(); setTimeout(() => grid.classList.remove('fresh'), 500); }, 450);
+    });
+    sheet();
+  }
+
+  /* ---------- 4 · 2048: swipe or arrow keys ---------- */
+  const g48 = $('[data-game="g2048"]');
+  if (g48) {
+    const box = $('.game-box', g48), board = $('[data-board]', g48), sc = $('[data-score]', g48), bs = $('[data-best]', g48);
+    let cells, score, best = parseInt(store.get('ksp-2048-best') || '0', 10) || 0, won;
+    bs.textContent = pad4(best);
+    const empty = () => cells.map((v, k) => (v ? -1 : k)).filter((k) => k >= 0);
+    const add = () => { const e = empty(); if (e.length) cells[e[(Math.random() * e.length) | 0]] = Math.random() < 0.9 ? 2 : 4; };
+    const draw = (fresh = -1) => {
+      board.innerHTML = '';
+      cells.forEach((v, k) => {
+        const t = document.createElement('div');
+        t.className = 'g-cell' + (v ? ' v' + Math.min(v, 4096) : '') + (k === fresh ? ' new' : '');
+        t.textContent = v || '';
+        board.appendChild(t);
+      });
+      sc.textContent = pad4(score);
+    };
+    const start = () => { cells = Array(16).fill(0); score = 0; won = false; add(); add(); draw(); };
+    const line = (row) => {
+      const v = row.filter(Boolean), outL = [];
+      for (let k = 0; k < v.length; k++) {
+        if (v[k] === v[k + 1]) { outL.push(v[k] * 2); score += v[k] * 2; if (v[k] * 2 === 2048) won = true; k++; } else outL.push(v[k]);
+      }
+      while (outL.length < 4) outL.push(0);
+      return outL;
+    };
+    const move = (dir) => {
+      const before = cells.join();
+      for (let a = 0; a < 4; a++) {
+        const idx = [0, 1, 2, 3].map((b) => (dir === 'L' ? a * 4 + b : dir === 'R' ? a * 4 + 3 - b : dir === 'U' ? b * 4 + a : (3 - b) * 4 + a));
+        const res = line(idx.map((k) => cells[k]));
+        idx.forEach((k, n) => { cells[k] = res[n]; });
+      }
+      if (cells.join() === before) return;
+      const e0 = empty(); add();
+      const fresh = e0.find((k) => cells[k]) ?? -1;
+      draw(fresh); buzz(5); tone(520, 60, 'sine', 0.05);
+      if (score > best) { best = score; store.set('ksp-2048-best', String(best)); bs.textContent = pad4(best); }
+      if (won) { won = false; winCard(box, 'You made 2048', 'Keep going or start fresh.', start); return; }
+      const stuck = !empty().length && !cells.some((v, k) => (k % 4 < 3 && v === cells[k + 1]) || (k < 12 && v === cells[k + 4]));
+      if (stuck) winCard(box, `Score ${score}`, 'No moves left. Nice try.', start);
+    };
+    box.addEventListener('keydown', (e) => {
+      const m = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'U', ArrowDown: 'D' }[e.key];
+      if (m) { e.preventDefault(); move(m); }
+    });
+    let sx = 0, sy = 0;
+    board.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; box.focus({ preventScroll: true }); });
+    board.addEventListener('pointerup', (e) => {
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+      move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
+    });
+    start();
   }
 
   /* =====================================================================

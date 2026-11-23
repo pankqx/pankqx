@@ -25,7 +25,7 @@ The two PDFs are built from two LaTeX files in [`resume/`](resume/). **Don't upl
 
 ## Projects on the site
 
-The site has two pages. **`index.html`** (Home) holds your projects and resumes, and **`about.html`** holds everything about you. For projects, edit `index.html` and search (Ctrl+F) for the markers below.
+The site has four pages: **`index.html`** (Home: projects and resumes), **`about.html`** (about you), **`play.html`** (games) and **`contact.html`**. For projects, edit `index.html` and search (Ctrl+F) for the markers below.
 
 ### Edit a featured project
 

@@ -1,6 +1,6 @@
 name: Deploy site to GitHub Pages
 
-# Every push to main rebuilds the three resumes from resume/*.tex,
+# Every push to main rebuilds the two resumes from resume/*.tex,
 # then publishes the whole site. If LaTeX fails, nothing is published
 # and the previous version stays live.
 
@@ -39,7 +39,7 @@ jobs:
         run: bash resume/build.sh
 
       - name: Stamp asset versions (so phones never mix old and new files)
-        run: sed -i "s/__V__/${GITHUB_SHA::7}/g" index.html about.html brand.html
+        run: sed -i "s/__V__/${GITHUB_SHA::7}/g" *.html
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

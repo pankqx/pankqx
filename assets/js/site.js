@@ -229,6 +229,7 @@
     const tb = document.createElement('nav');
     tb.className = 'tabbar mono'; tb.setAttribute('aria-label', 'Pages');
     $$('a', topNav).forEach((a) => {
+      if ((a.dataset.sec || '') === 'resume') return;     // phones already have the Resume button up top
       const c = a.cloneNode(true);
       const num = $('span', c); if (num) num.remove();
       if (a.classList.contains('is-here')) c.setAttribute('aria-current', 'page');
@@ -1125,6 +1126,41 @@
       move(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
     });
     start();
+  }
+
+
+  /* ---------- Blog: filters, reading bar, copy link, tap a photo to see it big ---------- */
+  const filt = $('.filters');
+  if (filt) {
+    filt.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      $$('button', filt).forEach((x) => x.classList.toggle('on', x === b));
+      $$('.feat, .post').forEach((c) => { c.hidden = !!b.dataset.f && c.dataset.tag !== b.dataset.f; });
+    });
+  }
+  const rb = $('.readbar'), art = $('.essay');
+  if (rb && art) {
+    const upd = () => {
+      const r = art.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - innerHeight * 0.6)));
+      rb.style.width = (p * 100) + '%';
+    };
+    addEventListener('scroll', upd, { passive: true }); upd();
+  }
+  $$('[data-copy]').forEach((b) => b.addEventListener('click', () => {
+    const done = () => { const t = b.textContent; b.textContent = 'Copied'; setTimeout(() => { b.textContent = t; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(b.dataset.copy).then(done, done); else done();
+  }));
+  if (art) {
+    art.addEventListener('click', (e) => {
+      const img = e.target.closest('img'); if (!img || img.closest('a')) return;
+      const lb = document.createElement('div'); lb.className = 'lb'; lb.setAttribute('role', 'dialog'); lb.setAttribute('aria-label', 'Photo, tap to close');
+      const big = document.createElement('img'); big.src = img.currentSrc || img.src; big.alt = img.alt;
+      lb.appendChild(big); document.body.appendChild(lb);
+      const close = () => { lb.remove(); removeEventListener('keydown', esc); };
+      const esc = (ev) => { if (ev.key === 'Escape') close(); };
+      lb.addEventListener('click', close); addEventListener('keydown', esc);
+    });
   }
 
   /* =====================================================================

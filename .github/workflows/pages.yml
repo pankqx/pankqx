@@ -38,8 +38,13 @@ jobs:
       - name: Build resumes
         run: bash resume/build.sh
 
+      - name: Build blog (blog/posts/*.md -> blog pages)
+        run: |
+          pip install --quiet markdown pillow
+          python3 blog/build.py
+
       - name: Stamp asset versions (so phones never mix old and new files)
-        run: sed -i "s/__V__/${GITHUB_SHA::7}/g" *.html
+        run: sed -i "s/__V__/${GITHUB_SHA::7}/g" *.html blog/*.html
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

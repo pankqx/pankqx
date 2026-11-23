@@ -1,0 +1,10 @@
+{
+  // Drag or paste a photo into a blog post and VS Code saves it in blog/img/<post-name>/
+  "markdown.copyFiles.destination": {
+    "blog/posts/**": "blog/img/${documentBaseName}/"
+  },
+  "markdown.editor.drop.enabled": "always",
+  "markdown.editor.filePaste.enabled": "always",
+  "editor.wordWrap": "on",
+  "[markdown]": { "editor.wordWrap": "on", "editor.fontSize": 16, "editor.lineHeight": 26 }
+}

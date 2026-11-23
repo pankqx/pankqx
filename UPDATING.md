@@ -89,3 +89,44 @@ The line "You are visitor #0421" in the footer comes from a free counting servic
 ## The look (`assets/css/site.css`)
 
 Colours and fonts are the variables at the very top (`:root`). The block called `Rev D · quiet` near the bottom controls the spacing and the clean look: `--gap` is the space between sections, `--surface` is the soft panel colour.
+
+## Writing a blog post (VS Code)
+
+**Every day, in this order:**
+
+1. `git pull`  (get the latest copy first)
+2. Copy `blog/posts/_template.md` and rename it, for example `blog/posts/day-01-why-100-days.md`.
+   The file name becomes the web address: `.../blog/day-01-why-100-days.html`
+3. Fill in the top part (title, subtitle, date, day). Change `draft: true` to `draft: false` when it's ready.
+4. Write. Press **Ctrl+Shift+V** to see a preview next to it, like Word.
+5. **Photos:** drag a photo from your folder into the text (or copy it and press Ctrl+V).
+   VS Code saves it in `blog/img/<post-name>/` and writes the line for you. Big phone photos get shrunk automatically.
+6. Check it on your laptop: run `python3 blog/build.py` (on Windows: `py blog/build.py`), then right-click `blog/index.html` → **Open with Live Server**.
+7. Publish:
+   ```
+   git add -A
+   git commit -m "Day 1: why 100 days"
+   git push
+   ```
+   It's live in about 4 minutes.
+
+**The blocks you can use** (all shown in `blog/posts/_example.md`):
+
+| You type | You get |
+|---|---|
+| a blank line | a new paragraph |
+| `## Heading` | a heading |
+| `**bold**`, `*italic*`, `[text](link)` | bold, italic, a link |
+| `![caption](../img/post/photo.jpg)` on its own line | a photo with a caption |
+| `> a line` and `> — who said it` | a big quote |
+| `::: side` … `:::` | a photo and text side by side |
+| `::: gallery` … `:::` | 2 to 4 photos in a grid |
+| `::: takeaways` … `:::` | a boxed list |
+| `::: note` … `:::` | a highlighted side note |
+| `::: sources` … `:::` | small print sources at the end |
+| a YouTube link on its own line | the video |
+| `---` | a small divider |
+
+Files starting with `_` are never published. The `.html` files inside `blog/` are made by the script, never edit them.
+
+First time on a new laptop: `pip install markdown pillow`, and install the **Live Server** extension in VS Code.

@@ -47,7 +47,7 @@ jobs:
         run: sed -i "s/__V__/${GITHUB_SHA::7}/g" *.html blog/*.html
 
       - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: .
       - id: deployment

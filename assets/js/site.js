@@ -35,7 +35,7 @@
     const esc = (ch) => (ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : ch === '&' ? '&amp;' : ch);
     const logs = $$('.boot-log p', boot);
     const track = $('.boot-bar .track', boot), pc = $('.boot-bar .pc', boot);
-    const BAR = 28, ART = 2600, TOTAL = 4700;
+    const BAR = 28, ART = 2300, TOTAL = 4000;
     const t0 = performance.now();
     let done = false, raf = 0;
     const paint = (p) => {
@@ -222,6 +222,21 @@
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   addEventListener('resize', onScroll);
   onScroll();
+
+  /* ---------- phones: bottom tab bar, built from the top menu so they never differ ---------- */
+  const topNav = $('.nav');
+  if (topNav && !$('.tabbar')) {
+    const tb = document.createElement('nav');
+    tb.className = 'tabbar mono'; tb.setAttribute('aria-label', 'Pages');
+    $$('a', topNav).forEach((a) => {
+      const c = a.cloneNode(true);
+      const num = $('span', c); if (num) num.remove();
+      if (a.classList.contains('is-here')) c.setAttribute('aria-current', 'page');
+      tb.appendChild(c);
+    });
+    document.body.appendChild(tb);
+    navLinks.push(...$$('a', tb));
+  }
 
   /* ---------- index menu (phones) ---------- */
   const menu = $('#sheet-menu'), menuBtn = $('.menu-btn');

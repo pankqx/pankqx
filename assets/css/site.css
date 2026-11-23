@@ -1429,3 +1429,16 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 /* memory on the Play page */
 [data-game='memory'] .cards { gap: 8px; }
 [data-game='memory'] .cards { grid-template-columns: repeat(4, 1fr) !important; }
+
+/* ============ Rev S · phones: bottom tab bar ============ */
+.tabbar { display: none; }
+@media (max-width: 999px) {
+  .tabbar { position: fixed; z-index: 60; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); display: flex; justify-content: space-between;
+    background: color-mix(in srgb, var(--card) 94%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    border: 1px solid var(--rule-2); padding: 4px; }
+  .tabbar a { flex: 1; text-align: center; padding: 11px 2px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); text-decoration: none; }
+  .tabbar a.is-active { color: var(--on-acc, #fff); background: var(--signal); }
+  body { padding-bottom: 74px; }
+  .boot ~ .tabbar, html:not(.ready) .tabbar { opacity: 0; }
+  .tabbar { transition: opacity .4s; }
+}

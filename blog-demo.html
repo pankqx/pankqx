@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Blog demo · K S Pankaj</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+/* DEMO ONLY. Nothing here is saved. It shows what the blog and the writing page will look like. */
+:root{--paper:#efeae1;--card:#f7f3ec;--ink:#1f1b16;--ink2:#5d554b;--ink3:#8c8378;--rule:#ddd5c8;--acc:#af3a03;
+  --sans:Archivo,system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;--serif:'Instrument Serif',serif;--read:Newsreader,Georgia,serif}
+*{box-sizing:border-box}html,body{margin:0}body{background:var(--paper);color:var(--ink);font:16px/1.55 var(--sans)}
+a{color:inherit}
+.demo-bar{position:sticky;top:0;z-index:20;display:flex;gap:6px;align-items:center;padding:10px 14px;background:var(--ink);color:#efeae1;font:12px var(--mono);overflow-x:auto}
+.demo-bar b{color:#fe8019;margin-right:6px;white-space:nowrap}
+.demo-bar button{all:unset;cursor:pointer;padding:8px 12px;border:1px solid #4a443d;white-space:nowrap;letter-spacing:.06em;text-transform:uppercase;font-size:11px}
+.demo-bar button[aria-pressed=true]{background:#fe8019;color:#1f1b16;border-color:#fe8019}
+.view{display:none}.view.on{display:block}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.serif{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--acc)}
+/* fake photos: soft gradients standing in for your pictures */
+.ph{position:relative;background:var(--g);background-size:cover;overflow:hidden}
+.ph::after{content:attr(data-l);position:absolute;right:10px;bottom:8px;font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.g1{--g:radial-gradient(120% 90% at 20% 10%,#f6c38b,transparent 55%),linear-gradient(160deg,#3b2a20,#0f1418 70%)}
+.g2{--g:radial-gradient(90% 80% at 80% 20%,#9cc5c9,transparent 60%),linear-gradient(200deg,#2f4a52,#121a1d)}
+.g3{--g:radial-gradient(100% 90% at 30% 80%,#e8a87c,transparent 60%),linear-gradient(140deg,#6b3b2a,#1d1512)}
+.g4{--g:radial-gradient(80% 70% at 60% 30%,#d6d0c3,transparent 60%),linear-gradient(180deg,#59534a,#25221e)}
+.g5{--g:radial-gradient(90% 90% at 20% 30%,#b9c98e,transparent 55%),linear-gradient(160deg,#334028,#121610)}
+.g6{--g:radial-gradient(90% 80% at 70% 70%,#c7a6e0,transparent 55%),linear-gradient(200deg,#2e2540,#0f0d14)}
+
+/* ===== 1 · blog list ===== */
+.b-head{padding:56px 0 26px;border-bottom:1px solid var(--rule)}
+.b-head h1{font-size:clamp(40px,8vw,84px);line-height:.95;margin:10px 0 14px;letter-spacing:-.03em;font-weight:800}
+.b-head p{max-width:560px;color:var(--ink2);margin:0}
+.prog{display:flex;align-items:center;gap:14px;margin-top:22px}
+.prog-bar{flex:1;max-width:420px;height:8px;background:var(--rule);position:relative}
+.prog-bar i{position:absolute;inset:0 auto 0 0;width:12%;background:var(--acc)}
+.dots{display:grid;grid-template-columns:repeat(25,1fr);gap:4px;max-width:420px;margin-top:12px}
+.dots i{aspect-ratio:1;background:var(--rule)}.dots i.d{background:var(--acc)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;padding:20px 0}
+.filters span{font:11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:7px 11px;border:1px solid var(--rule);cursor:pointer}
+.filters span.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.feat{display:grid;gap:0;border:1px solid var(--rule);background:var(--card);text-decoration:none;margin-bottom:22px}
+@media(min-width:800px){.feat{grid-template-columns:1.3fr 1fr}}
+.feat .ph{min-height:300px}
+.feat-t{padding:24px}
+.feat-t h2{font-family:var(--read);font-weight:500;font-size:clamp(26px,3.4vw,38px);line-height:1.12;margin:10px 0}
+.feat-t p{color:var(--ink2);margin:0 0 16px}
+.grid{display:grid;gap:18px;padding-bottom:60px}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}@media(min-width:980px){.grid{grid-template-columns:1fr 1fr 1fr}}
+.post{background:var(--card);border:1px solid var(--rule);text-decoration:none;display:block;transition:transform .25s}
+.post:hover{transform:translateY(-3px)}
+.post .ph{aspect-ratio:4/3}
+.post div.t{padding:14px 16px 18px}
+.post h3{font-family:var(--read);font-weight:500;font-size:21px;line-height:1.2;margin:6px 0}
+.day{display:inline-block;font:11px var(--mono);letter-spacing:.06em;color:var(--acc)}
+
+/* ===== 2 · a post (photo essay) ===== */
+.hero{position:relative;min-height:88vh;display:flex;align-items:flex-end;color:#fff}
+.hero .ph{position:absolute;inset:0}
+.hero .ph::before{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,rgba(0,0,0,.72))}
+.hero-t{position:relative;padding:0 20px 56px;max-width:860px;margin:0 auto;width:100%}
+.hero-t .mono{color:rgba(255,255,255,.8)}
+.hero-t h1{font-family:var(--read);font-weight:500;font-size:clamp(36px,6.4vw,72px);line-height:1.04;margin:12px 0 12px;letter-spacing:-.01em}
+.hero-t p{font-size:19px;max-width:620px;margin:0;color:rgba(255,255,255,.88)}
+.readbar{position:fixed;left:0;top:0;height:3px;background:var(--acc);width:0;z-index:30}
+.essay{max-width:680px;margin:0 auto;padding:44px 20px 20px;font:20px/1.7 var(--read)}
+.essay p{margin:0 0 1.1em}
+.essay .lead::first-letter{float:left;font-size:4.2em;line-height:.85;padding:6px 10px 0 0;color:var(--acc);font-family:var(--serif)}
+.full{margin:40px 0}.full .ph{height:70vh;min-height:320px}
+figcaption{font:13px/1.5 var(--mono);color:var(--ink3);padding:10px 20px 0;max-width:680px;margin:0 auto}
+.side{display:grid;gap:26px;max-width:1000px;margin:44px auto;padding:0 20px;align-items:center}
+@media(min-width:800px){.side{grid-template-columns:1fr 1fr}}
+.side .ph{aspect-ratio:4/5}.side p{font:20px/1.7 var(--read);margin:0}
+.pull{max-width:820px;margin:50px auto;padding:0 20px;font:italic clamp(28px,4vw,42px)/1.25 var(--serif);color:var(--acc);text-align:center}
+.pull small{display:block;margin-top:10px;font:12px var(--mono);font-style:normal;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase}
+.gal{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:200px 200px;gap:8px;max-width:1000px;margin:40px auto 0;padding:0 20px}
+.gal .ph:first-child{grid-row:1/3}
+.take{max-width:680px;margin:40px auto;padding:22px 24px;border:1px solid var(--rule);background:var(--card)}
+.take h4{margin:0 0 10px;font:12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}
+.take ol{margin:0;padding-left:20px;font:18px/1.6 var(--read)}
+.src{max-width:680px;margin:0 auto;padding:0 20px;font:13px/1.7 var(--mono);color:var(--ink3)}
+.end{max-width:680px;margin:40px auto 70px;padding:22px 20px 0;border-top:1px solid var(--rule);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.btn{font:11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:12px 16px;border:1px solid var(--ink);background:none;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn.solid{background:var(--acc);border-color:var(--acc);color:#fff}
+
+/* ===== 3 · writing page (only you) ===== */
+.ed{display:grid;min-height:calc(100vh - 44px)}
+@media(min-width:980px){.ed{grid-template-columns:360px 1fr}}
+.ed-l{background:#1f1b16;color:#efeae1;padding:18px}
+.ed-l h3{font:12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#fe8019;margin:4px 0 12px}
+.ed-l input,.ed-l textarea{width:100%;background:#2a2520;border:1px solid #3d3731;color:#efeae1;padding:10px;font:15px var(--sans);margin-bottom:10px}
+.blk{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid #3d3731;margin-bottom:6px;font-size:14px;background:#26221d}
+.blk i{font-style:normal;color:#8c8378;cursor:grab}.blk span{flex:1}.blk em{font:10px var(--mono);font-style:normal;color:#fe8019;text-transform:uppercase}
+.add{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0 16px}
+.add button{all:unset;cursor:pointer;text-align:center;padding:12px 4px;border:1px dashed #5d554b;font:10.5px var(--mono);text-transform:uppercase;letter-spacing:.04em;color:#d6cfc4}
+.add button:hover{border-color:#fe8019;color:#fe8019}
+.ed-act{display:grid;gap:8px}
+.ed-act .btn{color:#efeae1;border-color:#5d554b;text-align:center}.ed-act .btn.solid{border-color:#fe8019;background:#fe8019;color:#1f1b16}
+.note{font:12px/1.5 var(--mono);color:#8c8378;margin-top:12px}
+.ed-r{padding:20px;overflow:auto}
+.prev{background:var(--paper);border:1px solid var(--rule);max-width:760px;margin:0 auto}
+.prev .ph{height:260px;display:flex;align-items:flex-end;color:#fff}
+.prev .ph h2{position:relative;font-family:var(--read);font-weight:500;font-size:34px;margin:0;padding:20px;line-height:1.1}
+.prev .body{padding:20px 26px;font:18px/1.65 var(--read)}
+.prev .body .sel{outline:2px solid var(--acc);outline-offset:6px}
+.ig{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin:24px auto 0;max-width:760px}
+.igc{width:220px;aspect-ratio:4/5;color:#fff;padding:16px;display:flex;flex-direction:column;justify-content:space-between}
+.igc b{position:relative;font:500 22px/1.15 var(--read)}.igc span{position:relative;font:10px var(--mono);letter-spacing:.08em}
+.li{flex:1;min-width:260px;max-width:480px;background:#fff;border:1px solid var(--rule);padding:14px;font-size:14px;color:#333;white-space:pre-line}
+.cap{text-align:center;font:11px var(--mono);color:var(--ink3);text-transform:uppercase;letter-spacing:.06em;margin-top:8px}
+</style>
+</head>
+<body>
+<div class="readbar" id="rb"></div>
+<div class="demo-bar"><b>DEMO</b>
+<button aria-pressed="true" data-v="list">1 · Blog page</button>
+<button aria-pressed="false" data-v="post">2 · A post</button>
+<button aria-pressed="false" data-v="write">3 · Your writing page</button>
+</div>
+
+<!-- ================= 1 · BLOG PAGE ================= -->
+<section class="view on" id="list">
+<div class="wrap">
+<header class="b-head">
+<span class="mono">Blog · 100 days of AI</span>
+<h1>One day, <span class="serif">one idea.</span></h1>
+<p>Every day for 100 days I spend an hour on what’s new in AI and write it down in simple words. Photos, notes and what I think.</p>
+<div class="prog"><span class="mono">Day 12 / 100</span><div class="prog-bar"><i></i></div></div>
+<div class="dots" id="dots"></div>
+</header>
+<div class="filters"><span class="on">All</span><span>100 days of AI</span><span>Building</span><span>Trips</span><span>Notes</span></div>
+<a class="feat" href="#" data-go="post">
+<div class="ph g1" data-l="your cover photo"></div>
+<div class="feat-t"><span class="day">DAY 12 · LATEST</span><h2>The week small AI models got really good</h2><p>Three new small models can run on a laptop. I tried one on mine. Here’s what worked and what didn’t.</p><span class="mono">5 min read · 24 Nov 2026</span></div>
+</a>
+<div class="grid">
+<a class="post" href="#" data-go="post"><div class="ph g2" data-l="photo"></div><div class="t"><span class="day">DAY 11</span><h3>What “agents” really means, in plain words</h3><span class="mono">4 min</span></div></a>
+<a class="post" href="#" data-go="post"><div class="ph g3" data-l="photo"></div><div class="t"><span class="day">DAY 10</span><h3>I asked 3 AIs the same coding question</h3><span class="mono">6 min</span></div></a>
+<a class="post" href="#" data-go="post"><div class="ph g5" data-l="photo"></div><div class="t"><span class="day">DAY 9</span><h3>A coffee, a train and a new AI paper</h3><span class="mono">3 min</span></div></a>
+<a class="post" href="#" data-go="post"><div class="ph g4" data-l="photo"></div><div class="t"><span class="day">BUILDING</span><h3>How I built ProntoPy’s code judge</h3><span class="mono">8 min</span></div></a>
+<a class="post" href="#" data-go="post"><div class="ph g6" data-l="photo"></div><div class="t"><span class="day">DAY 8</span><h3>AI images vs real photos: can you tell?</h3><span class="mono">4 min</span></div></a>
+<a class="post" href="#" data-go="post"><div class="ph g2" data-l="photo"></div><div class="t"><span class="day">TRIPS</span><h3>Mangaluru to Bengaluru, in 12 pictures</h3><span class="mono">photo essay</span></div></a>
+</div>
+</div>
+</section>
+
+<!-- ================= 2 · A POST ================= -->
+<section class="view" id="post">
+<div class="hero"><div class="ph g1" data-l="full-screen cover photo"></div>
+<div class="hero-t"><span class="mono">Day 12 / 100 · 5 min read · 24 Nov 2026</span>
+<h1>The week small AI models got really good</h1>
+<p>You don’t need a giant server anymore. I tried it on my own laptop.</p></div></div>
+<article>
+<div class="essay">
+<p class="lead">This week three companies released small AI models. Small means they fit on a normal laptop. No internet, no monthly bill. I spent my hour today testing one on my Dell.</p>
+<p>The setup took ten minutes. The first answer took four seconds. That’s slow next to ChatGPT, but it’s running on my machine, in my hostel room, for free.</p>
+</div>
+<figure class="full"><div class="ph g2" data-l="big photo, full width"></div><figcaption>My laptop at 1 a.m., running the model. The fan was not happy.</figcaption></figure>
+<div class="side"><div class="ph g3" data-l="photo + text side by side"></div>
+<p>So what is it good at? Short answers, summaries and simple code. I gave it a Python bug from ProntoPy and it found the problem on the first try. For long essays it starts to drift.</p></div>
+<div class="pull">“The best AI is the one you can actually run.”<small>my note to self, day 12</small></div>
+<div class="essay"><p>Why does this matter? Because students like me can now build AI features without paying for an API. That changes what one person can ship.</p></div>
+<div class="gal"><div class="ph g5" data-l="gallery"></div><div class="ph g4" data-l=""></div><div class="ph g6" data-l=""></div></div>
+<figcaption>Screenshots from the test. Tap any photo to see it big.</figcaption>
+<div class="take"><h4>3 things to remember</h4><ol><li>Small models now run on normal laptops.</li><li>Good for short tasks and code. Weak on long writing.</li><li>Free and private, because nothing leaves your machine.</li></ol></div>
+<div class="src">Sources: the model’s release notes · my own test</div>
+<div class="end"><span class="mono">← Day 11 · Day 13 →</span><span><a class="btn" href="#">Share on LinkedIn</a> <a class="btn solid" href="#">Tell me what you think</a></span></div>
+</article>
+</section>
+
+<!-- ================= 3 · WRITING PAGE ================= -->
+<section class="view" id="write">
+<div class="ed">
+<aside class="ed-l">
+<h3>New post · Day 13</h3>
+<input value="Can AI really read handwriting now?" aria-label="Title">
+<input value="I tested it on my old college notes." aria-label="One line under the title">
+<h3>Blocks · drag to reorder</h3>
+<div class="blk"><i>⋮⋮</i><span>Cover photo</span><em>photo</em></div>
+<div class="blk"><i>⋮⋮</i><span>Today I tried something…</span><em>text</em></div>
+<div class="blk"><i>⋮⋮</i><span>Big photo + caption</span><em>photo</em></div>
+<div class="blk"><i>⋮⋮</i><span>Photo + text side by side</span><em>split</em></div>
+<div class="blk"><i>⋮⋮</i><span>“It got 9 out of 10 words…”</span><em>quote</em></div>
+<h3>Add a block</h3>
+<div class="add"><button>Text</button><button>Photo</button><button>Photo + text</button><button>Gallery</button><button>Quote</button><button>3 takeaways</button><button>Link card</button><button>Video</button><button>Divider</button></div>
+<div class="ed-act">
+<button class="btn">Save draft</button>
+<button class="btn solid">Publish</button>
+<button class="btn">Copy for LinkedIn</button>
+<button class="btn">Make Instagram cards</button>
+</div>
+<p class="note">Photos shrink automatically before upload. Only you can open this page.</p>
+</aside>
+<div class="ed-r">
+<div class="prev">
+<div class="ph g6" data-l="drop a photo here"><h2>Can AI really read handwriting now?</h2></div>
+<div class="body"><p class="sel">Today I tried something I’ve wanted to test for weeks: giving an AI my messiest college notes…</p><p style="color:#8c8378">Live preview. What you see here is exactly what readers will see.</p></div>
+</div>
+<div class="ig">
+<div><div class="igc ph g6" data-l=""><span>DAY 13 / 100</span><b>Can AI really read handwriting now?</b><span>pankqx · blog</span></div><p class="cap">Instagram card, made for you</p></div>
+<div><div class="li">Day 13/100 of learning AI in public.
+
+Can AI really read handwriting now? I tested it on my old college notes.
+
+It got 9 out of 10 words right. The 10th was my fault. 😅
+
+Full post with photos 👇
+pankqx.github.io/pankqx/blog/day-13
+
+#100DaysOfAI #AI #LearningInPublic</div><p class="cap">LinkedIn caption, ready to paste</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<script>
+const btns=[...document.querySelectorAll('.demo-bar button')];
+const show=v=>{document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id===v));btns.forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));scrollTo(0,0)};
+btns.forEach(b=>b.onclick=()=>show(b.dataset.v));
+document.querySelectorAll('[data-go]').forEach(a=>a.onclick=e=>{e.preventDefault();show(a.dataset.go)});
+const d=document.getElementById('dots');for(let i=0;i<100;i++){const x=document.createElement('i');if(i<12)x.className='d';d.appendChild(x)}
+addEventListener('scroll',()=>{const on=document.getElementById('post').classList.contains('on');const m=document.documentElement.scrollHeight-innerHeight;document.getElementById('rb').style.width=on?(scrollY/m*100)+'%':0});
+document.querySelectorAll('.filters span').forEach(s=>s.onclick=()=>{document.querySelectorAll('.filters span').forEach(x=>x.classList.remove('on'));s.classList.add('on')});
+</script>
+</body>
+</html>

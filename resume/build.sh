@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds the three resume PDFs and their web previews into ../assets/resume.
+# Builds the two resume PDFs (easy-read and ATS) and their web previews into ../assets/resume.
 # Runs automatically on GitHub after every push. To run it yourself you need
 # TeX Live (pdflatex + fontawesome5), poppler-utils and webp (cwebp).
 set -euo pipefail
@@ -22,9 +22,8 @@ build() {
   echo "built $name ($pages page)"
 }
 
-build ai-full-stack-engineer KS-Pankaj-AI-Full-Stack-Engineer
-build full-stack-engineer    KS-Pankaj-Full-Stack-Engineer
-build ai-engineer            KS-Pankaj-AI-Engineer
+build readable KS-Pankaj-Resume
+build ats      KS-Pankaj-Resume-ATS
 
 rm -f ./*.aux ./*.log ./*.out ./*.pdf
 rm -rf "$TMP"

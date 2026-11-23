@@ -6,17 +6,16 @@ Everything below can be done in the GitHub website, even from your phone: open a
 
 ## Resumes
 
-The three PDFs are built from the LaTeX files in [`resume/`](resume/). **Don't upload PDFs by hand.** Edit the `.tex` files, commit, and GitHub rebuilds all three PDFs and the on-page previews for you.
+The two PDFs are built from two LaTeX files in [`resume/`](resume/). **Don't upload PDFs by hand.** Edit the `.tex` files, commit, and GitHub rebuilds both PDFs and the on-page previews for you.
 
-| What you want to change | File |
+| Resume | File |
 |---|---|
-| Name, email, website, LinkedIn, GitHub | `resume/data/personal.tex` |
-| Experience, project bullets, education, certifications, hackathons, strengths (shared by all three resumes) | `resume/jobs/site_common.tex` |
-| AI Full-Stack Engineer: title, profile, skills, which projects appear | `resume/jobs/site_aifs.tex` |
-| Full-Stack Engineer: title, profile, skills, which projects appear | `resume/jobs/site_fullstack.tex` |
-| AI Engineer: title, profile, skills, which projects appear | `resume/jobs/site_ai.tex` |
+| Easy to read (designed, cards and chips) | `resume/readable.tex` |
+| ATS version (plain, for job portals) | `resume/ats.tex` |
 
-**Adding a new project to the resumes:** in `site_common.tex`, copy one of the `\newcommand{\pTonefer}{...}` blocks, rename it (for example `\pMyProject`), and change the text. Then list it inside `\projectsContent` in whichever `site_*.tex` files should show it.
+**Keep the facts in both files the same.** When you change a job, project or skill, change it in both.
+
+**Adding a project to the easy-read one:** copy one `\card{...}` block in `readable.tex`. Cards sit two per row. In `ats.tex`, copy one project line and its `\item`.
 
 **LaTeX gotchas:** write `&` as `\&`, `%` as `\%` and `#` as `\#`. Keep each resume to one page. If one spills onto a second page, the build log shows a yellow warning, so shorten a bullet.
 

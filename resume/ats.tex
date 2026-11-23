@@ -1,0 +1,78 @@
+% ATS resume: plain single column so job-portal software reads every word.
+% The designed twin is readable.tex. Keep the facts in both files the same.
+\documentclass[10.5pt]{article}
+\usepackage[a4paper,margin=15mm,top=13mm,bottom=12mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[default]{sourcesanspro}
+\usepackage{enumitem,titlesec}
+\usepackage[hidelinks]{hyperref}
+\input{glyphtounicode}\pdfgentounicode=1
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\titleformat{\section}{\bfseries\MakeUppercase}{}{0pt}{}[\vspace{1pt}\hrule]
+\titlespacing*{\section}{0pt}{9pt}{5pt}
+\setlist[itemize]{leftmargin=13pt,itemsep=1pt,topsep=2pt}
+\newcommand{\entry}[3]{\textbf{#1}, #2\hfill #3\par}
+
+\begin{document}
+{\LARGE\bfseries K S Pankaj}\par\vspace{3pt}
+Software Engineer\par\vspace{2pt}
+pankqx@gmail.com \,|\, linkedin.com/in/pankqx \,|\, github.com/pankqx \,|\, pankqx.github.io/pankqx
+
+\section{Summary}
+MCA student (2027) who builds full-stack web apps, APIs and cloud deployments. Built a Python and DSA learning platform, an encrypted phone-to-laptop transfer app and a leave management system running on AWS. Co-authored a study on using LLMs to detect Trojan Source attacks in code. Fast learner who builds end to end.
+
+\section{Technical Skills}
+\textbf{Languages:} Java, TypeScript, JavaScript, Python, Kotlin, SQL, HTML, CSS\\
+\textbf{Frontend:} React, Next.js, Angular, Vite, Responsive UI\\
+\textbf{Backend:} Node.js, Express.js, aiohttp, REST APIs, WebSockets, JWT\\
+\textbf{Databases:} PostgreSQL, MongoDB, MySQL, Supabase, Query Optimization\\
+\textbf{Cloud and DevOps:} AWS EC2, Docker, Nginx, PM2, Linux, Git, GitHub Actions, CI/CD, Automated Testing\\
+\textbf{AI:} LLM APIs, Prompt Engineering, JSON Schema Validation, TTS/STT, Claude Code, Codex
+
+\section{Experience}
+\entry{Software Developer Intern}{Prasanna Technologies Pvt. Ltd.}{Jun 2026}
+\begin{itemize}
+\item Built configuration-driven forms and reusable UI components for an enterprise platform.
+\item Debugged backend issues using logs, network tracing and PostgreSQL in Git and Docker based sprints.
+\end{itemize}
+\entry{Freelance Software Developer}{House of Anaika}{May 2026}
+\begin{itemize}
+\item Built a headless Shopify storefront for 300+ products, a Python lead generation tool and a Zoho CRM sales workflow.
+\end{itemize}
+\entry{IT Head (Freelance)}{Government First Grade College, Malur}{Jun 2023 -- Apr 2024}
+\begin{itemize}
+\item Built a faculty data collection system for NAAC accreditation, organised evidence by criterion and maintained the college website.
+\end{itemize}
+
+\section{Projects}
+\textbf{ProntoPy: Python, DSA and AI/ML Learning Platform} | React, Vite, Pyodide, Supabase\hfill\href{https://python-dsa-sigma.vercel.app/}{Live}
+\begin{itemize}
+\item Built a learning platform with 47 modules, 360+ lessons and 940 practice problems, a LeetCode-style judge and in-browser Python via Pyodide.
+\end{itemize}
+\textbf{Tonefer: Encrypted Phone-to-Laptop Transfer} | Python, Kotlin\hfill\href{https://github.com/pankqx/Tonefer}{GitHub}
+\begin{itemize}
+\item Built offline transfers over hotspot or USB with QR-shared 256-bit keys and XSalsa20-Poly1305 encryption; shipped Android, Ubuntu and Windows apps with CI builds.
+\end{itemize}
+\textbf{Leaflet: Leave Management System} | Angular 17, Node.js, Express, MongoDB\hfill\href{https://github.com/pankqx/leavemgm}{GitHub}
+\begin{itemize}
+\item Built leave requests, manager approvals and server-enforced rules with JWT auth; deployed on AWS EC2 with Nginx, PM2 and MongoDB Atlas, with automated API tests.
+\end{itemize}
+\textbf{MindMirror: Student Wellness App and AI Necklace} | React, TypeScript, Node.js, ESP32\hfill\href{https://github.com/pankqx/MindMirror}{GitHub}
+\begin{itemize}
+\item Integrated a wellness web app, a Node.js voice and AI hub and ESP32 firmware; ranked first in Round 1 and top 5 of 100 teams at CODE MEET 2026, Srinivas University.
+\end{itemize}
+
+\section{Research}
+\textbf{A Comparative Study of Large Language Models for Detecting Trojan Source Vulnerabilities in Software Code} (co-author, manuscript). Evaluated four LLMs on TSBench, a 3,308-program benchmark in Python, JavaScript, Go and C.
+
+\section{Education}
+\entry{Master of Computer Applications (MCA)}{St Aloysius (Deemed to be University)}{2025 -- 2027}
+\entry{B.Sc. Mathematics and Computer Science}{Government First Grade College, Malur; CGPA 7.5}{2022 -- 2025}
+\entry{12th (PU)}{Narayana PU College, Bengaluru; 76\%}{}
+\entry{10th (SSLC)}{Christ International School, Malur; 72\%}{}
+
+\section{Certifications and Activities}
+\textbf{Certifications:} NPTEL Cloud Computing, NPTEL Cybersecurity, Oracle Introduction to AI, Infosys Springboard Programming in Python\\
+\textbf{Leadership:} Hosted the Eleven Bytes coding event with 25+ colleges; regular hackathon participant
+\end{document}

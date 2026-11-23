@@ -1415,7 +1415,7 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
 @keyframes bub-in { from { transform: scale(.4); opacity: 0; } }
 /* 2048 */
 .g2048 { padding: 18px; }
-.g-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; touch-action: none; -webkit-user-select: none; user-select: none; }
+.g-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; touch-action: pan-y pinch-zoom; -webkit-user-select: none; user-select: none; }
 .g-cell { aspect-ratio: 1; display: grid; place-items: center; background: var(--paper); border: 1px solid var(--rule); font-family: var(--f-mono); font-weight: 500; font-size: clamp(16px, 4.6vw, 24px); color: var(--ink); }
 .g-cell.new { animation: bub-in .2s var(--ease); }
 .g-cell.v2 { background: color-mix(in srgb, var(--signal) 6%, var(--paper)); }
@@ -1442,3 +1442,10 @@ main::after { right: max(0px, calc(50% - min(50% - 12px, 660px) - 12px)); }
   .boot ~ .tabbar, html:not(.ready) .tabbar { opacity: 0; }
   .tabbar { transition: opacity .4s; }
 }
+
+/* 2048 on phones: swipes only belong to the game while playing */
+.is-playing .g-board { touch-action: none; }
+.g-hint { display: block; padding: 0 18px 14px; font: 11px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.is-playing .g-hint { color: var(--signal); }
+.is-playing .g-hint::before { content: '● playing · tap outside to scroll  '; }
+.is-playing .g-hint span { display: none; }

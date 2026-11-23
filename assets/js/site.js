@@ -1100,16 +1100,25 @@
       const fresh = e0.find((k) => cells[k]) ?? -1;
       draw(fresh); buzz(5); tone(520, 60, 'sine', 0.05);
       if (score > best) { best = score; store.set('ksp-2048-best', String(best)); bs.textContent = pad4(best); }
-      if (won) { won = false; winCard(box, 'You made 2048', 'Keep going or start fresh.', start); return; }
+      if (won) { won = false; play(false); winCard(box, 'You made 2048', 'Keep going or start fresh.', start); return; }
       const stuck = !empty().length && !cells.some((v, k) => (k % 4 < 3 && v === cells[k + 1]) || (k < 12 && v === cells[k + 4]));
-      if (stuck) winCard(box, `Score ${score}`, 'No moves left. Nice try.', start);
+      if (stuck) { play(false); winCard(box, `Score ${score}`, 'No moves left. Nice try.', start); }
+      if (box.classList.contains('is-playing')) play(true);   // still swiping: keep play mode alive
     };
     box.addEventListener('keydown', (e) => {
       const m = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'U', ArrowDown: 'D' }[e.key];
       if (m) { e.preventDefault(); move(m); }
     });
+    // Phones: the board only grabs swipes while you're playing, so the page still scrolls.
+    // Tap the board to play. Tap outside, finish a game or rest 8 s and scrolling comes back.
+    let idle = 0;
+    const play = (on) => {
+      box.classList.toggle('is-playing', on); clearTimeout(idle);
+      if (on) idle = setTimeout(() => play(false), 8000);
+    };
+    document.addEventListener('pointerdown', (e) => { if (!box.contains(e.target)) play(false); });
     let sx = 0, sy = 0;
-    board.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; box.focus({ preventScroll: true }); });
+    board.addEventListener('pointerdown', (e) => { sx = e.clientX; sy = e.clientY; play(true); box.focus({ preventScroll: true }); });
     board.addEventListener('pointerup', (e) => {
       const dx = e.clientX - sx, dy = e.clientY - sy;
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;

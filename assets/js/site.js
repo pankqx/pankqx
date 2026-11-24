@@ -1165,37 +1165,30 @@
 
 
   /* =====================================================================
-     FEEDBACK BUBBLE (every page)
+     FEEDBACK FORM (inside the Contact page)
      Sends anonymous feedback to Supabase. The public key can only ADD rows;
      the table rules (set in Supabase) let nobody but Pankaj read them.
      Read them at inbox.html.
      ===================================================================== */
   const FB = { url: 'https://oclkdkonnuggeinbnkyn.supabase.co', key: 'sb_publishable_xky8jLFeXFjK6QKcldbi5g_6avxE51n' };
-  if (!document.body.classList.contains('pg-inbox')) {
+  const fbHost = $('[data-feedback]');
+  if (fbHost) {
     const faces = (name) => ['😐', '🙂', '😍'].map((f, k) => `<button type="button" class="fb-face" data-q="${name}" data-v="${k + 1}" aria-pressed="false" aria-label="${['Okay', 'Good', 'Loved it'][k]}">${f}</button>`).join('');
-    const wrap = document.createElement('div');
-    wrap.className = 'fb';
-    wrap.innerHTML = `
-<button class="fb-open" type="button" aria-expanded="false" aria-controls="fb-panel"><span aria-hidden="true">✦</span> Feedback</button>
-<form class="fb-panel" id="fb-panel" hidden novalidate>
-  <div class="fb-top"><b>Quick feedback</b><button class="fb-x" type="button" aria-label="Close">×</button></div>
-  <p class="fb-note">Anonymous. I read every one.</p>
+    fbHost.innerHTML = `
+<form class="fb-panel" novalidate>
+  <div class="fb-top"><b>Tell me what you think</b><span class="mono fb-anon">anonymous</span></div>
+  <p class="fb-note">Takes 20 seconds. I read every single one.</p>
   <div class="fb-q"><span>How were the projects?</span><div class="fb-faces">${faces('projects')}</div></div>
   <div class="fb-q"><span>And the site itself?</span><div class="fb-faces">${faces('site')}</div></div>
   <div class="fb-q"><span>Did you try the Play page?</span><div class="fb-faces"><button type="button" class="fb-chip" data-q="played" data-v="true" aria-pressed="false">Yes</button><button type="button" class="fb-chip" data-q="played" data-v="false" aria-pressed="false">Not yet</button></div></div>
   <label class="fb-l">What could I improve?<textarea name="message" rows="3" maxlength="1500" placeholder="Anything. Big or small."></textarea></label>
   <label class="fb-l">Name or contact <i>(optional)</i><input name="contact" maxlength="120" autocomplete="off" placeholder="Only if you want a reply"></label>
   <input class="fb-hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-  <button class="btn fb-send" type="submit">Send</button>
+  <button class="btn fb-send" type="submit">Send feedback <svg class="arr" aria-hidden="true"><use href="#i-arr"/></svg></button>
   <p class="fb-msg" role="status" aria-live="polite"></p>
 </form>`;
-    document.body.appendChild(wrap);
-    const openB = $('.fb-open', wrap), panel = $('.fb-panel', wrap), msg = $('.fb-msg', wrap), send = $('.fb-send', wrap);
+    const panel = $('form', fbHost), msg = $('.fb-msg', fbHost), send = $('.fb-send', fbHost);
     const ans = {};
-    const toggle = (on) => { panel.hidden = !on; openB.setAttribute('aria-expanded', String(on)); wrap.classList.toggle('is-open', on); if (on) { const f = $('.fb-face', panel); if (f) f.focus({ preventScroll: true }); } };
-    openB.addEventListener('click', () => toggle(panel.hidden));
-    $('.fb-x', wrap).addEventListener('click', () => { toggle(false); openB.focus(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) toggle(false); });
     panel.addEventListener('click', (e) => {
       const b = e.target.closest('[data-q]'); if (!b) return;
       $$(`[data-q="${b.dataset.q}"]`, panel).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
@@ -1221,7 +1214,7 @@
         panel.reset(); $$('[aria-pressed="true"]', panel).forEach((x) => x.setAttribute('aria-pressed', 'false'));
         Object.keys(ans).forEach((k) => delete ans[k]);
         msg.textContent = 'Thank you! That really helps. 🙏';
-        setTimeout(() => { toggle(false); msg.textContent = ''; }, 2600);
+        fbHost.classList.add('sent'); setTimeout(() => fbHost.classList.remove('sent'), 1600);
       }).catch(() => { msg.textContent = 'Could not send. Check your internet, or email pankqx@gmail.com.'; })
         .finally(() => { send.disabled = false; });
     });

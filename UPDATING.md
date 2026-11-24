@@ -6,16 +6,16 @@ Everything below can be done in the GitHub website, even from your phone: open a
 
 ## Resumes
 
-The two PDFs are built from two LaTeX files in [`resume/`](resume/). **Don't upload PDFs by hand.** Edit the `.tex` files, commit, and GitHub rebuilds both PDFs and the on-page previews for you.
+The three PDFs are built from LaTeX files in [`resume/`](resume/). **Don't upload PDFs by hand.** Edit the `.tex` files, commit, and GitHub rebuilds the PDFs and previews.
 
 | Resume | File |
 |---|---|
-| Easy to read (designed, cards and chips) | `resume/readable.tex` |
-| ATS version (plain, for job portals) | `resume/ats.tex` |
+| AI Full-Stack Engineer | `resume/ai-full-stack-engineer.tex` |
+| Full-Stack Engineer | `resume/full-stack-engineer.tex` |
+| AI Engineer | `resume/ai-engineer.tex` |
 
-**Keep the facts in both files the same.** When you change a job, project or skill, change it in both.
-
-**Adding a project to the easy-read one:** copy one `\card{...}` block in `readable.tex`. Cards sit two per row. In `ats.tex`, copy one project line and its `\item`.
+Each role file only holds what changes: the title, summary, skills and which 4 projects to show.
+Everything shared (your name, links, experience, education, research, the layout, and every project's text) lives once in `resume/common.tex`. Change a job or a project there and all three update.
 
 **LaTeX gotchas:** write `&` as `\&`, `%` as `\%` and `#` as `\#`. Keep each resume to one page. If one spills onto a second page, the build log shows a yellow warning, so shorten a bullet.
 

@@ -1,100 +1,122 @@
 ---
 title: Can AI spot code that lies to your eyes?
-subtitle: How I built a 3,308-program test, ran 16,752 AI reviews for $1.19, and what it taught me about LLMs.
+subtitle: I tested 4 AIs with 3,308 tricky programs. It cost me $1.19. Here's what happened, in simple words.
 date: 2026-11-25
 tag: Building
 cover: ../img/trojan-source/cover.jpg
-cover_caption: Line 3 hides an invisible character. Line 4 looks like a comment, but it runs.
+cover_caption: When we asked the AIs a plain question, this is how often each one caught the hidden trick.
 ---
 
-Some code lies. It looks safe on your screen, but the computer runs something else. The trick is called **Trojan Source**: invisible Unicode characters and look-alike letters hidden inside normal-looking code.
+Imagine you get a note from a friend that says "Meet me at 5". But part of the note is written in invisible ink. Under a special light, it actually says "Don't meet me at 5". You read one thing. The truth is something else.
 
-Today a lot of developers paste their code into a chatbot and ask "is this safe?". So my friend Ernest and I asked a simple question: **does the AI notice the trick?** This is the story of how we found out.
+Computer code can play the same trick. This is the story of how my friend Ernest and I tested whether AI can catch it. You don't need to know coding to follow along. I'll explain everything as we go.
 
-![On the left, what a person sees. On the right, what the computer actually runs.](../img/trojan-source/see-vs-run.svg)
+## First, what is code?
 
-## What the trick looks like
+Code is a list of instructions for a computer, written in a special language like Python. For example: "If this person is an admin, let them in. If not, keep them out." An admin is like the class monitor: the one person who's allowed into the special room.
 
-Take the word `admin`. Swap the first letter for a Cyrillic `а`. It looks exactly the same, but to the computer it's a different word. So a check like "if you're not admin, deny" never matches, and **everyone gets in**.
+## And what is an AI like ChatGPT?
 
-There are more versions. An invisible character can flip the order a line is shown in, so real code hides inside what looks like a comment. A zero-width space can sit inside a name and you'd never see it. The scary part: this is not just theory. In 2025, attackers used invisible characters to hide malware inside VS Code extensions that were installed over 35,000 times.
+Tools like ChatGPT are called **LLMs** (large language models). An LLM is a computer program that has read a huge pile of text from the internet, books and code. From all that reading, it learned to guess what word should come next. It's so good at guessing that it can answer questions, write essays, and even check code for mistakes.
 
-## Step 1 · Writing 3,308 tiny programs
+Today a lot of programmers paste their code into an AI and ask: **"Is this safe?"** So we wanted to know: can the AI be fooled?
 
-We couldn't test the AI with 10 examples and call it research. So I wrote a generator that builds small access-check programs, like "is this user an admin?" or "has this person paid?", in **Python, JavaScript, Go and C**.
+## The trick: code that lies
 
-Every attack program has a **clean twin**: same purpose, same layout, but safe. We also added safe code with normal non-English text, like an accented name or an Arabic string, to check whether the AI panics at anything that isn't plain English.
+The trick is called **Trojan Source**. The name comes from the old story of the Trojan horse: a gift that looked nice but had soldiers hiding inside.
 
-> Every attack has a twin that looks the same but is safe. That's what makes the test fair.
+![On the left, what a person sees. On the right, what the computer actually does.](../img/trojan-source/see-vs-run.svg)
 
-We used 7 attack types. Five come from the original Trojan Source paper. **Two are new ones we came up with**, where the trick hides in a data value instead of a name.
+Here's one version. The word `admin` is written with the English letter "a". But there's a Russian letter "а" that looks **exactly** the same. To your eyes, nothing changes. To the computer, it's a completely different word. So the check "keep out anyone who isn't admin" never works, and **everyone gets in**.
 
-## Step 2 · Running every single one
+There are other versions too:
 
-Labels you only check by eye can be wrong, so we ran every program. Attacks must print `GRANTED`. Safe ones must print `DENIED`.
+- **Invisible characters.** There are special letters you literally cannot see. They can sit inside a word without anyone noticing.
+- **Flipped text.** Some hidden characters flip the order of text on your screen, so real instructions hide inside what looks like a harmless note.
 
-That run caught something surprising: 72 Python attacks refused to run on Python 3.12. The reason? A Unicode update (15.1) now allows some invisible characters inside names, and **Python 3.13 accepts them**. We re-ran all 827 Python programs on 3.13 in Docker, and every label matched. The attack surface is actually growing.
+This isn't just a classroom idea. In 2025, attackers used invisible characters to hide harmful code inside add-ons for VS Code (a popular app programmers use). Over 35,000 people installed them.
 
-## Step 3 · One key, four AIs
+## Step 1 · Making 3,308 test programs
 
-![The whole study, end to end.](../img/trojan-source/pipeline.svg)
+To test the AIs properly, a few examples aren't enough. So I wrote a program that **makes other programs**. It created 3,308 small programs, each one doing a simple check like "is this person an admin?" or "has this person paid?".
 
-Instead of four accounts and four bills, I used **OpenRouter**: one API key, a little credit, and every model behind the same endpoint. I kept the four models in one list in my Python runner, so adding or swapping a model was a one-line change.
+They're written in 4 coding languages: Python, JavaScript, Go and C. That's like testing the same idea in English, Hindi, Kannada and Tamil.
 
-We picked four models on purpose, so each one stands for a different kind of AI:
+Here's the clever part. **Every tricky program has a twin** that looks the same but is honest. If the AI shouts "danger!" at both twins, it isn't really smart. It's just nervous. We also added honest programs with normal non-English words, like a name with an accent or a line of Arabic, to see if the AI panics at anything unusual.
 
-- **DeepSeek-Chat v3.1**: a big general model
-- **Qwen-2.5-Coder-32B**: an open model made for code
-- **Llama-3.1-8B**: a small open model
-- **GPT-4o-mini**: a popular paid model
+> Every trick has an honest twin. That's what makes the test fair.
 
-My Python script sent every program to every model at **temperature 0** (no randomness), with a limit of 400 tokens per answer. It saved every raw reply with the model name, time and endpoint. If a call failed, it tried again until all answers were valid.
+We used 7 kinds of tricks. Five come from the scientists who first discovered Trojan Source. **Two are brand new ones we invented.**
 
-Each program was reviewed **three times**:
+## Step 2 · Checking every program really works
 
-1. **Primed:** "You're a security reviewer. Watch for code that runs differently from how it looks."
-2. **Made visible:** the same prompt, but every hidden character is turned into a visible tag like `<U+202E>` first.
-3. **Neutral:** just "Does this code have a security problem?" No hints.
+Before testing the AIs, I ran all 3,308 programs to be 100% sure. Every tricky one had to wrongly let the person in. Every honest one had to correctly keep them out.
+
+This step taught me something surprising. 72 of the tricky Python programs didn't work on the older Python (version 3.12), but **they did work on the newer one (3.13)**. In 2023, the world's rulebook for letters and symbols (called Unicode) changed, and newer Python accepts more hidden characters. In simple words: **this trick is getting easier, not harder.**
+
+## Step 3 · One account, four AIs
+
+![The whole study, from start to finish.](../img/trojan-source/pipeline.svg)
+
+Each AI company normally wants its own account and its own bill. Instead, I used a website called **OpenRouter**. Think of it as **one remote control for many AIs**. I added a small amount of money to one account, and could talk to all four AIs through it.
+
+These were the four AIs I tested, each a different "type":
+
+- **DeepSeek**: a big, smart all-rounder
+- **Qwen Coder**: free to download, and trained especially on code
+- **Llama 8B**: a small, free one (small AIs are cheaper but usually less clever)
+- **GPT-4o mini**: a popular paid one, from the makers of ChatGPT
+
+My Python script sent every program to every AI. I set the AIs to "no guessing" mode (called temperature 0), so the same question always gets the same answer, which makes the test fair. The script saved every single answer, so nothing could be changed later.
+
+## Step 4 · Asking in three different ways
+
+Each AI looked at each program **three times**, with a different question each time:
+
+1. **The hint:** "You're a security checker. Watch out for code that looks different from what it does."
+2. **The highlighter:** the same hint, but first I made all the invisible characters visible, like using a highlighter on hidden ink.
+3. **The plain question:** just "Is there a security problem in this code?" No hints at all.
+
+Adding it all up, the AIs gave us **16,752 answers** to mark.
 
 ![The whole study in five numbers.](../img/trojan-source/numbers.svg)
 
-Yes, really. **16,752 AI reviews cost $1.19.** Research doesn't need a big budget, just good setup.
+And yes, the whole thing cost **$1.19**, about ₹100. Good research doesn't always need lots of money. It needs a careful plan.
 
-## Step 4 · Turning answers into a report
+## Step 5 · Marking the answers like a teacher
 
-Every answer had to say `SAFE` or `VULNERABLE`, plus the reason. We were strict: **an attack only counts as caught if the AI names the real cause**, like "homoglyph" or "zero-width character". Saying "vulnerable" for the wrong reason doesn't count.
+Every answer had to say "SAFE" or "NOT SAFE" and explain why. We marked them strictly, like a strict teacher: **the AI only got the mark if it gave the right reason**. Saying "not safe" for the wrong reason is like getting the right answer in maths by copying. No marks.
 
-I read the answers with regular expressions, then used two simple statistics tools. Wilson confidence intervals show how sure we can be about each percentage. McNemar's test checks whether one prompt is really better than another on the same programs. Out came the tables for the paper.
+Then we counted the scores and turned them into charts. We also used some maths to check that the differences were real and not just luck.
 
 ## What we found
 
-![Told to look for security problems, the models do well. Asked plainly, three of them drop hard.](../img/trojan-source/results.svg)
+![With a hint, the AIs did great. With a plain question, three of them dropped a lot.](../img/trojan-source/results.svg)
 
-**1. The AI catches it, if you tell it what to look for.** With the security prompt, the models named the real cause in 79 to 100% of attacks. With a plain "review this" prompt, three of the four models fell to 51–84%. Llama-8B dropped from 88% to 52%. Only DeepSeek stayed above 90%.
+**1. AI catches the trick, but only if you ask the right way.** With the hint, the AIs caught 79% to 100% of the tricks. With the plain question, three of the four dropped a lot. Llama fell from 88% to just 52%, which is barely better than flipping a coin. Only DeepSeek stayed strong (96%).
 
-**2. Making hidden characters visible did not help.** I expected this to be the fix. It wasn't. The strong models already "see" the characters. The visible tags just made every model nervous about *any* non-English text.
+**2. The highlighter idea backfired.** I expected that making hidden characters visible would help. It didn't. The smart AIs could already "see" them. Instead, the highlights made every AI nervous about **any** unusual letter, so they started calling honest code "dangerous".
 
-![Turning hidden characters into visible tags mostly created false alarms on normal code.](../img/trojan-source/false-alarms.svg)
+![Highlighting hidden characters made the AIs flag honest code as dangerous much more often.](../img/trojan-source/false-alarms.svg)
 
-**3. The sneakiest trick was the early return.** It hides a `return` inside what looks like a comment. Apart from DeepSeek, models caught only 4–42% of these with the plain prompt.
+**3. The sneakiest trick was hiding an instruction inside a note.** Programmers leave notes inside code for other people to read. The computer is supposed to skip them. One trick makes a real instruction look like part of a note. Apart from DeepSeek, the AIs caught it only 4% to 42% of the time when asked plainly.
 
-**4. Our two new attacks were not harder.** I thought hiding the trick in a data value would fool the models more. It didn't. Once they're looking, a Cyrillic letter in a short string is easy to spot.
+**4. Our two new tricks weren't harder to catch.** I thought they would fool the AIs more. They didn't. Once the AI is paying attention, a fake letter in a short word is easy to spot.
 
 ::: takeaways What I learned
-1. An AI reviewer is only as good as the question you ask it. Tell it what to look for.
-2. Don't trust AI review alone for security. Pair it with simple rule-based checks.
-3. Run your test data. Checking by eye would have missed the Python 3.13 surprise.
-4. Good research can be cheap. Our whole study cost $1.19.
+1. An AI is only as good as the question you ask it. Tell it exactly what to look for.
+2. Don't trust AI alone to keep code safe. Use a simple scanner tool too.
+3. Always test your test. Running every program caught a surprise I'd have missed.
+4. Big ideas can be cheap. This whole study cost less than a pizza.
 :::
 
-## Why it matters
+## Why this matters
 
-More and more code is now written *and* reviewed by AI. This study shows a gap: a model can see the hidden character and still not care, unless someone asks. If your team uses AI code review, add the security hint to the prompt, and keep a tool that flags dangerous Unicode characters. Don't flag every non-English letter, though. Real projects are multilingual.
+More and more code is now written by AI **and** checked by AI. Our study shows a gap: an AI can notice the hidden character and still not warn you, unless you ask the right question. So if your team uses AI to check code, give it clear instructions, and keep a simple tool that flags hidden characters.
 
-This was my first proper research paper, written with **Ernest Shaun Kotian**. Building the test was the fun part. Learning to be strict about what "correct" means was the real lesson.
+This was my first real research paper, written with **Ernest Shaun Kotian**. Building the test was the fun part. The real lesson was learning to be strict about what "correct" actually means.
 
 ::: sources
 - *A Comparative Study of Large Language Models for Detecting Trojan Source Vulnerabilities in Software Code*, K S Pankaj and Ernest Shaun Kotian (manuscript)
-- Boucher and Anderson (2023), *Trojan Source: Invisible Vulnerabilities*
-- CVE-2021-42574 and CVE-2021-42694
+- Boucher and Anderson, *Trojan Source: Invisible Vulnerabilities* (the scientists who first found the trick)
 :::

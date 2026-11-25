@@ -394,20 +394,36 @@
     };
     requestAnimationFrame(step);
   };
-  const isSheet = (u) => /\/([\w-]+\.html)?$/.test(u.pathname);
-  const norm = (pth) => pth.replace(/index\.html$/, '');
+  // Pages work with or without .html (GitHub serves /about for about.html)
+  const isSheet = (u) => /\/([\w-]+(\.html)?)?$/.test(u.pathname);
+  const norm = (pth) => pth.replace(/index(\.html)?$/, '').replace(/\.html$/, '');
+  // Section links (#work) scroll without leaving a # in the address bar
+  const goTo = (id) => { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); return !!el; };
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[href]');
     if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (a.target === '_blank' || a.hasAttribute('download')) return;
     let url;
     try { url = new URL(a.href); } catch (err) { return; }   // a.href respects <base>, so blog links work
-    if (url.origin !== location.origin || !isSheet(url) || norm(url.pathname) === norm(location.pathname)) return;
+    if (url.origin !== location.origin) return;
+    const samePage = norm(url.pathname) === norm(location.pathname);
+    if (url.hash && samePage) { e.preventDefault(); if (!goTo(url.hash.slice(1))) scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    if (!isSheet(url) || samePage) return;
     e.preventDefault();
-    wipeOut(() => { store.sset('ksp-wipe', '1'); location.href = url.href; });
+    const goto = url.hash.slice(1); url.hash = '';
+    wipeOut(() => { store.sset('ksp-wipe', '1'); if (goto) store.sset('ksp-goto', goto); location.href = url.href.replace(/#$/, ''); });
   });
   addEventListener('pageshow', (e) => { if (e.persisted && wipe) { wipe.innerHTML = ''; wipe.classList.remove('on'); doc.classList.remove('wipe-in'); } });
   wipeIn();
+  // arrived with a section to show (from another page, or a shared link with #): scroll there, keep the address clean
+  {
+    const want = store.sget('ksp-goto') || location.hash.slice(1);
+    if (want) {
+      store.sset('ksp-goto', '');
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+      setTimeout(() => goTo(want), 60);
+    }
+  }
 
   /* ---------- headings decode from random characters ---------- */
   const decodeEl = (el, dur = 800) => {

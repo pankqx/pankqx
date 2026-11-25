@@ -7,6 +7,7 @@ Blog builder. Turns your posts (blog/posts/*.md) into web pages.
 What it does:
   1. Shrinks big photos in blog/img/ (max 1600 px wide) so pages load fast on phones.
   2. Makes blog/index.html (the list of posts) and one page per post: blog/<post-name>.html
+     (links leave out .html: GitHub serves blog/<post-name> for it)
   3. Skips posts with  draft: true  at the top.
 
 You never edit the .html files in blog/. They are rebuilt every time.
@@ -242,7 +243,7 @@ def card(p, cls="post"):
     ph = f'<img src="{esc(p["cover"])}" alt="" loading="lazy">' if p["cover"] else '<span class="ph-none" aria-hidden="true">' + esc(p["title"][:1]) + "</span>"
     sub = f'<p>{esc(p["subtitle"])}</p>' if p["subtitle"] and cls == "feat" else ""
     when = p["date"].strftime("%-d %b %Y") if sys.platform != "win32" else p["date"].strftime("%#d %b %Y")
-    return (f'<a class="{cls} rv" href="blog/{p["slug"]}.html" data-tag="{esc(p["tag"])}"><div class="ph">{ph}</div>'
+    return (f'<a class="{cls} rv" href="blog/{p["slug"]}" data-tag="{esc(p["tag"])}"><div class="ph">{ph}</div>'
             f'<div class="t"><span class="day">{label}{" · LATEST" if cls == "feat" else ""}</span><h3>{esc(p["title"])}</h3>{sub}'
             f'<span class="meta mono">{p["mins"]} min read · {when}</span></div></a>')
 
@@ -284,14 +285,14 @@ def build_index(posts):
 def build_post(p, prev, nxt):
     when = p["date"].strftime("%-d %b %Y") if sys.platform != "win32" else p["date"].strftime("%#d %b %Y")
     label = f"Day {p['day']} / {CHALLENGE}" if p["day"] else p["tag"]
-    url = SITE + f"blog/{p['slug']}.html"
+    url = SITE + f"blog/{p['slug']}"
     cover = (f'<div class="cover-ph"><img src="{esc(p["cover"])}" alt="{esc(p["cover_caption"])}" fetchpriority="high"></div>'
              if p["cover"] else "")
     hero_cls = "p-hero has-cover" if p["cover"] else "p-hero"
     sub = f'<p class="p-sub">{esc(p["subtitle"])}</p>' if p["subtitle"] else ""
     nav = '<nav class="p-nav" aria-label="More posts">'
-    nav += f'<a href="blog/{prev["slug"]}.html"><small>← Older</small>{esc(prev["title"])}</a>' if prev else "<span></span>"
-    nav += f'<a class="r" href="blog/{nxt["slug"]}.html"><small>Newer →</small>{esc(nxt["title"])}</a>' if nxt else "<span></span>"
+    nav += f'<a href="blog/{prev["slug"]}"><small>← Older</small>{esc(prev["title"])}</a>' if prev else "<span></span>"
+    nav += f'<a class="r" href="blog/{nxt["slug"]}"><small>Newer →</small>{esc(nxt["title"])}</a>' if nxt else "<span></span>"
     nav += "</nav>"
     share = "https://www.linkedin.com/sharing/share-offsite/?url=" + url
     content = f'''<div class="readbar" aria-hidden="true"></div>
@@ -304,7 +305,7 @@ def build_post(p, prev, nxt):
 {render_body(p["body"])}
 </div>
 <div class="p-end">
-<div class="p-share"><a class="btn btn-ghost btn-sm" href="{share}" target="_blank" rel="noopener">Share on LinkedIn</a><button class="btn btn-ghost btn-sm" type="button" data-copy="{url}">Copy link</button><a class="btn btn-sm" href="contact.html">Say hi</a></div>
+<div class="p-share"><a class="btn btn-ghost btn-sm" href="{share}" target="_blank" rel="noopener">Share on LinkedIn</a><button class="btn btn-ghost btn-sm" type="button" data-copy="{url}">Copy link</button><a class="btn btn-sm" href="contact">Say hi</a></div>
 {nav}
 <a class="mono back" href="blog/">← All posts</a>
 </div>
@@ -332,7 +333,7 @@ def main():
         prev = posts[k + 1] if k + 1 < len(posts) else None
         (BLOG / f"{p['slug']}.html").write_text(build_post(p, prev, nxt), encoding="utf-8")
         print(f"  page  blog/{p['slug']}.html")
-    (BLOG / "posts.json").write_text(json.dumps([{"title": p["title"], "url": f"blog/{p['slug']}.html", "day": p["day"],
+    (BLOG / "posts.json").write_text(json.dumps([{"title": p["title"], "url": f"blog/{p['slug']}", "day": p["day"],
                                                    "date": p["date"].isoformat()} for p in posts], indent=1), encoding="utf-8")
     print(f"Done: {len(posts)} post(s). Open blog/index.html with Live Server to check.")
 

@@ -1567,3 +1567,4 @@ html:not(.ready) .fb { opacity: 0; pointer-events: none; }
   .ct-big .w > span { animation: none; transform: none; }
   .ct-plane, .pulse { animation: none; }
 }
+.pj-private { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); border: 1px dashed var(--rule-2); padding: 4px 8px; }

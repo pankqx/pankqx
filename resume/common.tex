@@ -1,6 +1,6 @@
 % Shared resume layout (Pankaj's own format). The three role files set the parts that change, then load this.
 \documentclass[a4paper,10pt]{article}
-\usepackage[a4paper,left=0.5in,right=0.5in,top=0.4in,bottom=0.35in]{geometry}
+\usepackage[a4paper,left=0.5in,right=0.5in,top=0.32in,bottom=0.28in]{geometry}
 \usepackage{iftex}
 \ifPDFTeX
   \usepackage[T1]{fontenc}
@@ -31,7 +31,7 @@
 \setlength{\emergencystretch}{2em}
 
 \titleformat{\section}{\large\scshape\bfseries}{}{0em}{}[\titlerule]
-\titlespacing{\section}{0pt}{6pt}{3pt}
+\titlespacing{\section}{0pt}{4pt}{2pt}
 
 \newenvironment{bullets}{\begin{itemize}[leftmargin=1.2em, itemsep=1pt, topsep=1.5pt, partopsep=0pt, parsep=0pt]}{\end{itemize}\vspace{1pt}}
 
@@ -108,6 +108,11 @@
 
 % ---------------- Experience ----------------
 \section*{Experience}
+\job{Yuken (warehouse dispatch app)}{Nov 2026 -- Present}{Freelance Software Developer}{}
+\begin{bullets}
+  \item Building a barcode dispatch app: workers scan boxes into lists, managers export them (Excel, PDF); 300--400 boxes a day in testing.
+\end{bullets}
+
 \job{Prasanna Technologies Pvt.\ Ltd.}{Jun 2026}{Software Developer Intern}{}
 \begin{bullets}
   \item Built configuration-driven forms and reusable UI components for an enterprise platform; debugged backend issues using logs, network tracing and PostgreSQL in Git- and Docker-based sprints.
@@ -147,7 +152,7 @@ B.Sc., Mathematics and Computer Science & Government First Grade College, Malur 
 
 % ---------------- Certs & Leadership ----------------
 \section*{Certifications \& Activities}
-\textbf{Certifications:} NPTEL Cloud Computing, NPTEL Cybersecurity, Oracle Introduction to AI, Infosys Springboard Programming in Python\\
+\textbf{Certifications:} NPTEL Cloud Computing, NPTEL Cybersecurity, Oracle Introduction to AI, Infosys Springboard Python\\
 \textbf{Leadership:} Hosted the Eleven Bytes coding event with 25+ colleges; regular hackathon participant\\
 \textbf{Interests:} Chess, cricket, volunteering, fitness
 

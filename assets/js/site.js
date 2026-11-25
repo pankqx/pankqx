@@ -401,7 +401,7 @@
     if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (a.target === '_blank' || a.hasAttribute('download')) return;
     let url;
-    try { url = new URL(a.getAttribute('href'), location.href); } catch (err) { return; }
+    try { url = new URL(a.href); } catch (err) { return; }   // a.href respects <base>, so blog links work
     if (url.origin !== location.origin || !isSheet(url) || norm(url.pathname) === norm(location.pathname)) return;
     e.preventDefault();
     wipeOut(() => { store.sset('ksp-wipe', '1'); location.href = url.href; });

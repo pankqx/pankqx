@@ -96,7 +96,7 @@ Colours and fonts are the variables at the very top (`:root`). The block called 
 
 1. `git pull`  (get the latest copy first)
 2. Copy `blog/posts/_template.md` and rename it, for example `blog/posts/day-01-why-100-days.md`.
-   The file name becomes the web address: `.../blog/day-01-why-100-days.html`
+   The file name becomes the web address: `.../blog/day-01-why-100-days`
 3. Fill in the top part (title, subtitle, date, day). Change `draft: true` to `draft: false` when it's ready.
 4. Write. Press **Ctrl+Shift+V** to see a preview next to it, like Word.
 5. **Photos:** drag a photo from your folder into the text (or copy it and press Ctrl+V).
